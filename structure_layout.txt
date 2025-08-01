@@ -1,0 +1,19 @@
+fabrication_app/
+│
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── database.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── material.py
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   └── material.py
+│   ├── routers/
+│   │   ├── __init__.py
+│   │   └── material.py
+│   └── dependencies.py
+│
+├── requirements.txt
+└── README.md
