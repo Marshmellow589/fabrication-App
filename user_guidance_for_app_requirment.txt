@@ -45,3 +45,8 @@ For testuser:
 
 - Username: testuser
 - Password: testpass
+ '''sqlite3 fabrication_app/app/database.db ".tables" \
+final_inspections     material_inspections  users \
+fit_up_inspections    ndt_requests'''
+
+"""uvicorn fabrication_app.app.main:app"""
