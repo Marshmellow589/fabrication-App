@@ -15,6 +15,11 @@ def create_material_inspection(db: Session = Depends(get_db), material_inspectio
     db.refresh(db_material_inspection)
     return db_material_inspection
 
+# Get all material inspection records
+@router.get("/material_inspections/")
+def read_all_material_inspections(db: Session = Depends(get_db)):
+    return db.query(MaterialInspection).all()
+
 # Get a material inspection record by ID
 @router.get("/material_inspections/{material_inspection_id}")
 def read_material_inspection(material_inspection_id: int, db: Session = Depends(get_db)):

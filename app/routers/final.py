@@ -15,6 +15,11 @@ def create_final_inspection(db: Session = Depends(get_db), final_inspection: sch
     db.refresh(db_final_inspection)
     return db_final_inspection
 
+# Get all final inspection records
+@router.get("/final_inspections/")
+def read_all_final_inspections(db: Session = Depends(get_db)):
+    return db.query(FinalInspection).all()
+
 # Get a final inspection record by ID
 @router.get("/final_inspections/{final_inspection_id}")
 def read_final_inspection(final_inspection_id: int, db: Session = Depends(get_db)):

@@ -15,6 +15,11 @@ def create_ndt_request(db: Session = Depends(get_db), ndt_request: schemas.NDTCr
     db.refresh(db_ndt_request)
     return db_ndt_request
 
+# Get all NDT request records
+@router.get("/ndt_requests/")
+def read_all_ndt_requests(db: Session = Depends(get_db)):
+    return db.query(NDTRequest).all()
+
 # Get an NDT request record by ID
 @router.get("/ndt_requests/{ndt_request_id}")
 def read_ndt_request(ndt_request_id: int, db: Session = Depends(get_db)):

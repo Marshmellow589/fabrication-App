@@ -15,6 +15,11 @@ def create_fit_up_inspection(db: Session = Depends(get_db), fit_up_inspection: s
     db.refresh(db_fit_up_inspection)
     return db_fit_up_inspection
 
+# Get all fit-up inspection records
+@router.get("/fit_up_inspections/")
+def read_all_fit_up_inspections(db: Session = Depends(get_db)):
+    return db.query(FitUpInspection).all()
+
 # Get a fit-up inspection record by ID
 @router.get("/fit_up_inspections/{fit_up_inspection_id}")
 def read_fit_up_inspection(fit_up_inspection_id: int, db: Session = Depends(get_db)):

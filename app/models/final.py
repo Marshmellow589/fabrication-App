@@ -22,6 +22,10 @@ class FinalInspection(Base):
     inspector_id = Column(Integer, ForeignKey("users.id"))
     inspector = relationship("User", back_populates="final_inspections")
     
+    # Relationship to FitUp
+    fit_up_id = Column(Integer, ForeignKey("fit_up_inspections.id"))
+    fit_up = relationship("FitUpInspection", back_populates="final_inspections")
+    
     # Final inspection specific fields
     wps_no = Column(String(50), nullable=False)
     welder_no = Column(String(50), nullable=False)
