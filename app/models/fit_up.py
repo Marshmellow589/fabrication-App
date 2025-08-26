@@ -28,11 +28,6 @@ class FitUpInspection(Base):
     
     part1 = relationship("MaterialInspection", foreign_keys=[part1_unique_piece_id])
     part2 = relationship("MaterialInspection", foreign_keys=[part2_unique_piece_id])
-    final_inspections = relationship(
-        "FinalInspection", 
-        back_populates="fit_up",
-        cascade="all, delete-orphan"
-    )
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

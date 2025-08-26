@@ -1,0 +1,47 @@
+# Application Requirements Overview
+
+## Application Architecture
+- The application is designed using the FastAPI architecture.
+
+## Application Purpose
+- This application is intended for managing records of fabrication inspections, including material inspection, fit-up inspection, final inspection, and NDT requests.
+
+## User Management
+- User management and data records are dependent on user authorization.
+- Admin users can add new users, delete invalid users, and perform user re-validation (valid period is 90 days).
+
+## Database Schema Requirements
+
+### Material Inspection
+- Columns: Type of material, material grade, Thickness, Diameter for pipe, heat_no, MVR report no, unique_piece_id.
+
+### Fit-Up Inspection
+- Columns: drawing no, system spec, line no, spool no, joint no, weld type, part1-unique_piece_id, part2-unique_piece_id, inspection result, inspection date, inspection operator, inspection remark.
+- Linked with material inspection's unique_piece_id for automatic retrieval of heat_no, thickness, MVR report no.
+
+### Final Inspection
+- Columns: drawing no, system spec, line no, spool no, joint no, weld type (inherited from fit-up inspection), wps no, welder no, inspection date, final report no, NDT-RT, NDT-PT, NDT-MT.
+
+### NDT Request
+- Columns: line no, spool no, joint no, weld type, thickness, dia, weld no, weld process, NDT-RT remark, NDT-PT remark, NDT-MT remark, NDT-RFI Date, RFI-NO.
+
+## Data Search and Manipulation
+- Users can search records using line no, spool no, joint no, and a concatenated string uniq_joint_no as the primary key.
+- Users can export records as CSV files.
+- Users can import records from CSV files.
+- Users can delete, update, and view records.
+
+## User Functionalities
+- Login and logout capabilities.
+- User registration.
+- Password reset.
+- Email, username, and role changes.
+- Viewing user profiles, lists, roles, emails, usernames, and passwords.
+- Viewing user lists filtered by role, email, username, or password.
+
+## Login and Navigation
+- The login page will display user access with username and password and remind users of login failures.
+- After login, the page will navigate to dashboard.html, providing quick links to material inspection, fit-up inspection, final inspection, and NDT Request.
+
+## Additional Notes
+- The application will use SQLite database as indicated by the provided commands.

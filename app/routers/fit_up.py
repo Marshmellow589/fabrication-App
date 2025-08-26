@@ -1,14 +1,15 @@
 from fastapi import APIRouter, HTTPException, Path, Query, Body, Depends
 from sqlalchemy.orm import Session
-from .. import models, schemas
-from ..database import SessionLocal
+from .. import schemas
+from ..database import get_db
+from ..models.fit_up import FitUpInspection
 
 router = APIRouter()
 
 # Create a new fit-up inspection record
 @router.post("/fit_up_inspections/")
-def create_fit_up_inspection(db: Session = Depends(SessionLocal), fit_up_inspection: schemas.FitUpCreate = Body(...)):
-    db_fit_up_inspection = models.FitUpInspection(**fit_up_inspection.dict())
+def create_fit_up_inspection(db: Session = Depends(get_db), fit_up_inspection: schemas.FitUpCreate = Body(...)):
+    db_fit_up_inspection = FitUpInspection(**fit_up_inspection.dict())
     db.add(db_fit_up_inspection)
     db.commit()
     db.refresh(db_fit_up_inspection)
@@ -16,16 +17,16 @@ def create_fit_up_inspection(db: Session = Depends(SessionLocal), fit_up_inspect
 
 # Get a fit-up inspection record by ID
 @router.get("/fit_up_inspections/{fit_up_inspection_id}")
-def read_fit_up_inspection(fit_up_inspection_id: int, db: Session = Depends(SessionLocal)):
-    db_fit_up_inspection = db.query(models.FitUpInspection).filter(models.FitUpInspection.id == fit_up_inspection_id).first()
+def read_fit_up_inspection(fit_up_inspection_id: int, db: Session = Depends(get_db)):
+    db_fit_up_inspection = db.query(FitUpInspection).filter(FitUpInspection.id == fit_up_inspection_id).first()
     if db_fit_up_inspection is None:
         raise HTTPException(status_code=404, detail="Fit-up inspection not found")
     return db_fit_up_inspection
 
 # Update a fit-up inspection record
 @router.put("/fit_up_inspections/{fit_up_inspection_id}")
-def update_fit_up_inspection(fit_up_inspection_id: int, db: Session = Depends(SessionLocal), fit_up_inspection: schemas.FitUpUpdate = Body(...)):
-    db_fit_up_inspection = db.query(models.FitUpInspection).filter(models.FitUpInspection.id == fit_up_inspection_id).first()
+def update_fit_up_inspection(fit_up_inspection_id: int, db: Session = Depends(get_db), fit_up_inspection: schemas.FitUpUpdate = Body(...)):
+    db_fit_up_inspection = db.query(FitUpInspection).filter(FitUpInspection.id == fit_up_inspection_id).first()
     if db_fit_up_inspection is None:
         raise HTTPException(status_code=404, detail="Fit-up inspection not found")
     db_fit_up_inspection.drawing_no = fit_up_inspection.drawing_no
@@ -46,8 +47,8 @@ def update_fit_up_inspection(fit_up_inspection_id: int, db: Session = Depends(Se
 
 # Delete a fit-up inspection record
 @router.delete("/fit_up_inspections/{fit_up_inspection_id}")
-def delete_fit_up_inspection(fit_up_inspection_id: int, db: Session = Depends(SessionLocal)):
-    db_fit_up_inspection = db.query(models.FitUpInspection).filter(models.FitUpInspection.id == fit_up_inspection_id).first()
+def delete_fit_up_inspection(fit_up_inspection_id: int, db: Session = Depends(get_db)):
+    db_fit_up_inspection = db.query(FitUpInspection).filter(FitUpInspection.id == fit_up_inspection_id).first()
     if db_fit_up_inspection is None:
         raise HTTPException(status_code=404, detail="Fit-up inspection not found")
     db.delete(db_fit_up_inspection)

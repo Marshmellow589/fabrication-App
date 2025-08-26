@@ -20,7 +20,7 @@ class User(Base):
     # Relationships to inspections
     material_inspections = relationship("MaterialInspection", back_populates="inspector")
     fit_up_inspections = relationship("FitUpInspection", back_populates="inspector")
-    final_inspections = relationship("FinalInspection", back_populates="inspector")
+    final_inspections = relationship("FinalInspection", back_populates="inspector", foreign_keys="[FinalInspection.inspector_id]")
     ndt_requests = relationship("NDTRequest", back_populates="inspector")
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())

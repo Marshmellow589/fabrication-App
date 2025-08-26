@@ -1,4 +1,4 @@
-1.this app is designed with FastAPI architechture
+1.this app is designed with FastAPI architechture,sqlalchemy,pydantic,react to create web application for data collection 
 2.this app use for small project with records of fabrication inspection of material inspection,fit up inspection, final inspection, and NDT Request
 3.user management and data records are required depend user authorization, admin user is allow to add new user, delete invalid user, and user re validation(defined valid perioud is 90 days)
 4.the data base for material inspection will be 'Type of material','material grade','Thickness','Dia for pipe','heat_no','MVR report no', and 'unique_piece_id'.
@@ -31,22 +31,3 @@ when user input the 'unique_piece_id', system will automatically search the mate
 30.the user can view the user list by role,email,username,password.
 31.the log in page will only display user access with user name and pass code,and able to remind if log in failure.
 32 after user login, the page will navigate to dashboard.html, and the material inspection,fit up inspection,final inspection and NDT Request all are ableto quick link from dashboard.html.
-
-those are the user guidline to desgin the app and webpage architecture.
-##--------------------------------------------------------
-PS D:\Backup\D_drive\deepseek_project\data_project> 
-#Set-ExecutionPolicy Bypass -Scope Process -Force; 
-#.\fabrication_env\Scripts\activate
-
-##-----------------------------
-# Register a new user
-Invoke-WebRequest -Uri "http://127.0.0.1:8001/auth/register" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"email":"test@example.com","username":"testuser","full_name":"Test User","password":"testpass","role":"inspector"}'
-For testuser:
-
-- Username: testuser
-- Password: testpass
- '''sqlite3 fabrication_app/app/database.db ".tables" \
-final_inspections     material_inspections  users \
-fit_up_inspections    ndt_requests'''
-
-"""uvicorn fabrication_app.app.main:app"""

@@ -27,7 +27,7 @@ class NDTRequest(Base):
     
     # Relationship to FinalInspection
     final_inspection_id = Column(Integer, ForeignKey("final_inspections.id"))
-    final_inspection = relationship("FinalInspection", back_populates="ndt_requests")
+    final_inspection = relationship("FinalInspection")
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

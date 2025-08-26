@@ -1,14 +1,15 @@
 from fastapi import APIRouter, HTTPException, Path, Query, Body, Depends
 from sqlalchemy.orm import Session
-from .. import models, schemas
-from ..database import SessionLocal
+from .. import schemas
+from ..database import get_db
+from ..models.ndt import NDTRequest
 
 router = APIRouter()
 
 # Create a new NDT request record
 @router.post("/ndt_requests/")
-def create_ndt_request(db: Session = Depends(SessionLocal), ndt_request: schemas.NDTCreate = Body(...)):
-    db_ndt_request = models.NDTRequest(**ndt_request.dict())
+def create_ndt_request(db: Session = Depends(get_db), ndt_request: schemas.NDTCreate = Body(...)):
+    db_ndt_request = NDTRequest(**ndt_request.dict())
     db.add(db_ndt_request)
     db.commit()
     db.refresh(db_ndt_request)
@@ -16,16 +17,16 @@ def create_ndt_request(db: Session = Depends(SessionLocal), ndt_request: schemas
 
 # Get an NDT request record by ID
 @router.get("/ndt_requests/{ndt_request_id}")
-def read_ndt_request(ndt_request_id: int, db: Session = Depends(SessionLocal)):
-    db_ndt_request = db.query(models.NDTRequest).filter(models.NDTRequest.id == ndt_request_id).first()
+def read_ndt_request(ndt_request_id: int, db: Session = Depends(get_db)):
+    db_ndt_request = db.query(NDTRequest).filter(NDTRequest.id == ndt_request_id).first()
     if db_ndt_request is None:
         raise HTTPException(status_code=404, detail="NDT request not found")
     return db_ndt_request
 
 # Update an NDT request record
 @router.put("/ndt_requests/{ndt_request_id}")
-def update_ndt_request(ndt_request_id: int, db: Session = Depends(SessionLocal), ndt_request: schemas.NDTUpdate = Body(...)):
-    db_ndt_request = db.query(models.NDTRequest).filter(models.NDTRequest.id == ndt_request_id).first()
+def update_ndt_request(ndt_request_id: int, db: Session = Depends(get_db), ndt_request: schemas.NDTUpdate = Body(...)):
+    db_ndt_request = db.query(NDTRequest).filter(NDTRequest.id == ndt_request_id).first()
     if db_ndt_request is None:
         raise HTTPException(status_code=404, detail="NDT request not found")
     db_ndt_request.line_no = ndt_request.line_no
@@ -47,8 +48,8 @@ def update_ndt_request(ndt_request_id: int, db: Session = Depends(SessionLocal),
 
 # Delete an NDT request record
 @router.delete("/ndt_requests/{ndt_request_id}")
-def delete_ndt_request(ndt_request_id: int, db: Session = Depends(SessionLocal)):
-    db_ndt_request = db.query(models.NDTRequest).filter(models.NDTRequest.id == ndt_request_id).first()
+def delete_ndt_request(ndt_request_id: int, db: Session = Depends(get_db)):
+    db_ndt_request = db.query(NDTRequest).filter(NDTRequest.id == ndt_request_id).first()
     if db_ndt_request is None:
         raise HTTPException(status_code=404, detail="NDT request not found")
     db.delete(db_ndt_request)

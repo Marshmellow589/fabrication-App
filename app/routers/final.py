@@ -1,14 +1,15 @@
 from fastapi import APIRouter, HTTPException, Path, Query, Body, Depends
 from sqlalchemy.orm import Session
-from .. import models, schemas
-from ..database import SessionLocal
+from .. import schemas
+from ..database import get_db
+from ..models.final import FinalInspection
 
 router = APIRouter()
 
 # Create a new final inspection record
 @router.post("/final_inspections/")
-def create_final_inspection(db: Session = Depends(SessionLocal), final_inspection: schemas.FinalCreate = Body(...)):
-    db_final_inspection = models.FinalInspection(**final_inspection.dict())
+def create_final_inspection(db: Session = Depends(get_db), final_inspection: schemas.FinalCreate = Body(...)):
+    db_final_inspection = FinalInspection(**final_inspection.dict())
     db.add(db_final_inspection)
     db.commit()
     db.refresh(db_final_inspection)
@@ -16,16 +17,16 @@ def create_final_inspection(db: Session = Depends(SessionLocal), final_inspectio
 
 # Get a final inspection record by ID
 @router.get("/final_inspections/{final_inspection_id}")
-def read_final_inspection(final_inspection_id: int, db: Session = Depends(SessionLocal)):
-    db_final_inspection = db.query(models.FinalInspection).filter(models.FinalInspection.id == final_inspection_id).first()
+def read_final_inspection(final_inspection_id: int, db: Session = Depends(get_db)):
+    db_final_inspection = db.query(FinalInspection).filter(FinalInspection.id == final_inspection_id).first()
     if db_final_inspection is None:
         raise HTTPException(status_code=404, detail="Final inspection not found")
     return db_final_inspection
 
 # Update a final inspection record
 @router.put("/final_inspections/{final_inspection_id}")
-def update_final_inspection(final_inspection_id: int, db: Session = Depends(SessionLocal), final_inspection: schemas.FinalUpdate = Body(...)):
-    db_final_inspection = db.query(models.FinalInspection).filter(models.FinalInspection.id == final_inspection_id).first()
+def update_final_inspection(final_inspection_id: int, db: Session = Depends(get_db), final_inspection: schemas.FinalUpdate = Body(...)):
+    db_final_inspection = db.query(FinalInspection).filter(FinalInspection.id == final_inspection_id).first()
     if db_final_inspection is None:
         raise HTTPException(status_code=404, detail="Final inspection not found")
     db_final_inspection.drawing_no = final_inspection.drawing_no
@@ -47,8 +48,8 @@ def update_final_inspection(final_inspection_id: int, db: Session = Depends(Sess
 
 # Delete a final inspection record
 @router.delete("/final_inspections/{final_inspection_id}")
-def delete_final_inspection(final_inspection_id: int, db: Session = Depends(SessionLocal)):
-    db_final_inspection = db.query(models.FinalInspection).filter(models.FinalInspection.id == final_inspection_id).first()
+def delete_final_inspection(final_inspection_id: int, db: Session = Depends(get_db)):
+    db_final_inspection = db.query(FinalInspection).filter(FinalInspection.id == final_inspection_id).first()
     if db_final_inspection is None:
         raise HTTPException(status_code=404, detail="Final inspection not found")
     db.delete(db_final_inspection)

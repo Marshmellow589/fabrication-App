@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .database import SessionLocal, engine
+from .database import engine
 from . import models, schemas, routers
 
 app = FastAPI()

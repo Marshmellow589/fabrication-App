@@ -1,14 +1,15 @@
 from fastapi import APIRouter, HTTPException, Path, Query, Body, Depends
 from sqlalchemy.orm import Session
-from .. import models, schemas
-from ..database import SessionLocal
+from .. import schemas
+from ..database import get_db
+from ..models.material import MaterialInspection
 
 router = APIRouter()
 
 # Create a new material inspection record
 @router.post("/material_inspections/")
-def create_material_inspection(db: Session = Depends(SessionLocal), material_inspection: schemas.MaterialCreate = Body(...)):
-    db_material_inspection = models.Material(**material_inspection.dict())
+def create_material_inspection(db: Session = Depends(get_db), material_inspection: schemas.MaterialCreate = Body(...)):
+    db_material_inspection = MaterialInspection(**material_inspection.dict())
     db.add(db_material_inspection)
     db.commit()
     db.refresh(db_material_inspection)
@@ -16,16 +17,16 @@ def create_material_inspection(db: Session = Depends(SessionLocal), material_ins
 
 # Get a material inspection record by ID
 @router.get("/material_inspections/{material_inspection_id}")
-def read_material_inspection(material_inspection_id: int, db: Session = Depends(SessionLocal)):
-    db_material_inspection = db.query(models.MaterialInspection).filter(models.MaterialInspection.id == material_inspection_id).first()
+def read_material_inspection(material_inspection_id: int, db: Session = Depends(get_db)):
+    db_material_inspection = db.query(MaterialInspection).filter(MaterialInspection.id == material_inspection_id).first()
     if db_material_inspection is None:
         raise HTTPException(status_code=404, detail="Material inspection not found")
     return db_material_inspection
 
 # Update a material inspection record
 @router.put("/material_inspections/{material_inspection_id}")
-def update_material_inspection(material_inspection_id: int, db: Session = Depends(SessionLocal), material_inspection: schemas.MaterialUpdate = Body(...)):
-    db_material_inspection = db.query(models.MaterialInspection).filter(models.MaterialInspection.id == material_inspection_id).first()
+def update_material_inspection(material_inspection_id: int, db: Session = Depends(get_db), material_inspection: schemas.MaterialUpdate = Body(...)):
+    db_material_inspection = db.query(MaterialInspection).filter(MaterialInspection.id == material_inspection_id).first()
     if db_material_inspection is None:
         raise HTTPException(status_code=404, detail="Material inspection not found")
     db_material_inspection.type_of_material = material_inspection.type_of_material
@@ -41,8 +42,8 @@ def update_material_inspection(material_inspection_id: int, db: Session = Depend
 
 # Delete a material inspection record
 @router.delete("/material_inspections/{material_inspection_id}")
-def delete_material_inspection(material_inspection_id: int, db: Session = Depends(SessionLocal)):
-    db_material_inspection = db.query(models.MaterialInspection).filter(models.MaterialInspection.id == material_inspection_id).first()
+def delete_material_inspection(material_inspection_id: int, db: Session = Depends(get_db)):
+    db_material_inspection = db.query(MaterialInspection).filter(MaterialInspection.id == material_inspection_id).first()
     if db_material_inspection is None:
         raise HTTPException(status_code=404, detail="Material inspection not found")
     db.delete(db_material_inspection)
