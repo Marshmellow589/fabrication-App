@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from . import user, material, fit_up, final, ndt
+from . import user, material, fit_up, final, ndt, auth
 
 # Create a main router
 def get_routers():

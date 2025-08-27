@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from .. import schemas
 from ..database import get_db
-from ..models import User
+from ..models.user import User
 from ..dependencies import (
     authenticate_user,
     create_access_token,

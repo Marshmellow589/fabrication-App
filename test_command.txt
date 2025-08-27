@@ -1,0 +1,19 @@
+
+those are the user guidline to desgin the app and webpage architecture.
+##--------------------------------------------------------
+PS D:\Backup\D_drive\deepseek_project\data_project> 
+#Set-ExecutionPolicy Bypass -Scope Process -Force; 
+#.\fabrication_env\Scripts\activate
+
+##-----------------------------
+# Register a new user
+Invoke-WebRequest -Uri "http://127.0.0.1:8001/auth/register" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"email":"test@example.com","username":"testuser","full_name":"Test User","password":"testpass","role":"inspector"}'
+For testuser:
+
+- Username: testuser
+- Password: testpass
+ '''sqlite3 fabrication_app/app/database.db ".tables" \
+final_inspections     material_inspections  users \
+fit_up_inspections    ndt_requests'''
+
+"""uvicorn fabrication_app.app.main:app"""
