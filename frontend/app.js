@@ -234,6 +234,20 @@ function showMaterialForm() {
     modal.show();
 }
 
+// Show fit up form modal
+function showFitUpForm() {
+    const modal = new bootstrap.Modal(document.getElementById('fitUpModal'));
+    document.getElementById('fitUpForm').reset();
+    modal.show();
+}
+
+// Show final inspection form modal
+function showFinalForm() {
+    const modal = new bootstrap.Modal(document.getElementById('finalModal'));
+    document.getElementById('finalForm').reset();
+    modal.show();
+}
+
 // Submit material form
 async function submitMaterialForm() {
     const form = document.getElementById('materialForm');
@@ -278,32 +292,59 @@ async function submitMaterialForm() {
 // Edit material
 async function editMaterial(id) {
     try {
+        console.log('Editing material with ID:', id);
         const response = await fetch(`${API_BASE_URL}/material_inspections/${id}`);
         if (!response.ok) throw new Error('Failed to fetch material');
         
         const material = await response.json();
+        console.log('Material data loaded:', material);
         
         // Fill the form with existing data
-        document.getElementById('materialForm').reset();
-        document.querySelector('input[name="type_of_material"]').value = material.type_of_material;
-        document.querySelector('input[name="material_grade"]').value = material.material_grade;
-        document.querySelector('input[name="thickness"]').value = material.thickness;
-        document.querySelector('input[name="dia_for_pipe"]').value = material.dia_for_pipe || '';
-        document.querySelector('input[name="heat_no"]').value = material.heat_no;
-        document.querySelector('input[name="mvr_report_no"]').value = material.mvr_report_no;
-        document.querySelector('input[name="unique_piece_id"]').value = material.unique_piece_id;
+        const form = document.getElementById('materialForm');
+        form.reset();
+        
+        // Set form field values
+        const typeInput = document.querySelector('input[name="type_of_material"]');
+        const gradeInput = document.querySelector('input[name="material_grade"]');
+        const thicknessInput = document.querySelector('input[name="thickness"]');
+        const diaInput = document.querySelector('input[name="dia_for_pipe"]');
+        const heatInput = document.querySelector('input[name="heat_no"]');
+        const mvrInput = document.querySelector('input[name="mvr_report_no"]');
+        const uniqueIdInput = document.querySelector('input[name="unique_piece_id"]');
+        
+        if (typeInput) typeInput.value = material.type_of_material;
+        if (gradeInput) gradeInput.value = material.material_grade;
+        if (thicknessInput) thicknessInput.value = material.thickness;
+        if (diaInput) diaInput.value = material.dia_for_pipe || '';
+        if (heatInput) heatInput.value = material.heat_no;
+        if (mvrInput) mvrInput.value = material.mvr_report_no;
+        if (uniqueIdInput) uniqueIdInput.value = material.unique_piece_id;
+        
+        console.log('Form fields populated');
         
         // Show modal and set up update handler
-        const modal = new bootstrap.Modal(document.getElementById('materialModal'));
-        modal.show();
-        
-        // Change submit button to update
-        const submitBtn = document.querySelector('#materialModal .btn-primary');
-        submitBtn.textContent = 'Update Material';
-        submitBtn.onclick = () => updateMaterial(id);
+        const modalElement = document.getElementById('materialModal');
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+            
+            // Change modal title and submit button
+            const modalTitle = document.querySelector('#materialModal .modal-title');
+            const submitBtn = document.querySelector('#materialModal .btn-primary');
+            
+            if (modalTitle) modalTitle.textContent = 'Edit Material Inspection';
+            if (submitBtn) {
+                submitBtn.textContent = 'Update Material';
+                submitBtn.onclick = () => updateMaterial(id);
+            }
+            
+            console.log('Modal shown for editing');
+        } else {
+            console.error('Modal element not found');
+        }
     } catch (error) {
         console.error('Error loading material for edit:', error);
-        alert('Error loading material for editing.');
+        alert('Error loading material for editing. Check console for details.');
     }
 }
 
@@ -369,6 +410,56 @@ async function deleteMaterial(id) {
     }
 }
 
+// Submit fit up form
+async function submitFitUpForm() {
+    const form = document.getElementById('fitUpForm');
+    const formData = new FormData(form);
+    
+    // Format date to ISO string for backend
+    const inspectionDate = formData.get('inspection_date');
+    const formattedDate = inspectionDate ? new Date(inspectionDate).toISOString() : null;
+    
+    const fitUpData = {
+        drawing_no: formData.get('drawing_no'),
+        system_spec: formData.get('system_spec'),
+        line_no: formData.get('line_no'),
+        spool_no: formData.get('spool_no'),
+        joint_no: formData.get('joint_no'),
+        weld_type: formData.get('weld_type'),
+        part1_unique_piece_id: formData.get('part1_unique_piece_id'),
+        part2_unique_piece_id: formData.get('part2_unique_piece_id'),
+        inspection_result: formData.get('inspection_result'),
+        inspection_date: formattedDate,
+        inspection_operator: formData.get('inspection_operator'),
+        inspection_remark: formData.get('inspection_remark')
+    };
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/fit_up_inspections/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(fitUpData)
+        });
+        
+        if (!response.ok) throw new Error('Failed to create fit up inspection');
+        
+        const newFitUp = await response.json();
+        fitUps.push(newFitUp);
+        renderFitUpsTable();
+        updateDashboard();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('fitUpModal'));
+        modal.hide();
+        
+        alert('Fit up inspection created successfully!');
+    } catch (error) {
+        console.error('Error creating fit up inspection:', error);
+        alert('Error creating fit up inspection. Please try again.');
+    }
+}
+
 // Edit fit up inspection
 async function editFitUp(id) {
     try {
@@ -376,11 +467,149 @@ async function editFitUp(id) {
         if (!response.ok) throw new Error('Failed to fetch fit up inspection');
         
         const fitUp = await response.json();
-        alert(`Edit fit up inspection ${id} - Data loaded: ${JSON.stringify(fitUp)}`);
-        // TODO: Implement fit up edit form
+        
+        // Fill the form with existing data
+        const form = document.getElementById('fitUpForm');
+        form.reset();
+        
+        // Set form field values
+        document.querySelector('input[name="drawing_no"]').value = fitUp.drawing_no || '';
+        document.querySelector('input[name="system_spec"]').value = fitUp.system_spec || '';
+        document.querySelector('input[name="line_no"]').value = fitUp.line_no || '';
+        document.querySelector('input[name="spool_no"]').value = fitUp.spool_no || '';
+        document.querySelector('input[name="joint_no"]').value = fitUp.joint_no || '';
+        document.querySelector('select[name="weld_type"]').value = fitUp.weld_type || '';
+        document.querySelector('input[name="part1_unique_piece_id"]').value = fitUp.part1_unique_piece_id || '';
+        document.querySelector('input[name="part2_unique_piece_id"]').value = fitUp.part2_unique_piece_id || '';
+        document.querySelector('select[name="inspection_result"]').value = fitUp.inspection_result || '';
+        
+        // Format date for input field (YYYY-MM-DD)
+        const inspectionDate = fitUp.inspection_date ? new Date(fitUp.inspection_date).toISOString().split('T')[0] : '';
+        document.querySelector('input[name="inspection_date"]').value = inspectionDate;
+        
+        document.querySelector('input[name="inspection_operator"]').value = fitUp.inspection_operator || '';
+        document.querySelector('textarea[name="inspection_remark"]').value = fitUp.inspection_remark || '';
+        
+        // Show modal and set up update handler
+        const modal = new bootstrap.Modal(document.getElementById('fitUpModal'));
+        modal.show();
+        
+        // Change modal title and submit button
+        const modalTitle = document.querySelector('#fitUpModal .modal-title');
+        const submitBtn = document.querySelector('#fitUpModal .btn-primary');
+        
+        if (modalTitle) modalTitle.textContent = 'Edit Fit Up Inspection';
+        if (submitBtn) {
+            submitBtn.textContent = 'Update Fit Up';
+            submitBtn.onclick = () => updateFitUp(id);
+        }
     } catch (error) {
         console.error('Error loading fit up for edit:', error);
         alert('Error loading fit up inspection for editing.');
+    }
+}
+
+// Update fit up inspection
+async function updateFitUp(id) {
+    const form = document.getElementById('fitUpForm');
+    const formData = new FormData(form);
+    
+    // Format date to ISO string for backend
+    const inspectionDate = formData.get('inspection_date');
+    const formattedDate = inspectionDate ? new Date(inspectionDate).toISOString() : null;
+    
+    const fitUpData = {
+        drawing_no: formData.get('drawing_no'),
+        system_spec: formData.get('system_spec'),
+        line_no: formData.get('line_no'),
+        spool_no: formData.get('spool_no'),
+        joint_no: formData.get('joint_no'),
+        weld_type: formData.get('weld_type'),
+        part1_unique_piece_id: formData.get('part1_unique_piece_id'),
+        part2_unique_piece_id: formData.get('part2_unique_piece_id'),
+        inspection_result: formData.get('inspection_result'),
+        inspection_date: formattedDate,
+        inspection_operator: formData.get('inspection_operator'),
+        inspection_remark: formData.get('inspection_remark')
+    };
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/fit_up_inspections/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(fitUpData)
+        });
+        
+        if (!response.ok) throw new Error('Failed to update fit up inspection');
+        
+        const updatedFitUp = await response.json();
+        fitUps = fitUps.map(f => f.id === id ? updatedFitUp : f);
+        renderFitUpsTable();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('fitUpModal'));
+        modal.hide();
+        
+        alert('Fit up inspection updated successfully!');
+    } catch (error) {
+        console.error('Error updating fit up inspection:', error);
+        alert('Error updating fit up inspection. Please try again.');
+    }
+}
+
+// Submit final inspection form
+async function submitFinalForm() {
+    const form = document.getElementById('finalForm');
+    const formData = new FormData(form);
+    
+    // Format date to ISO string for backend
+    const inspectionDate = formData.get('inspection_date');
+    const formattedDate = inspectionDate ? new Date(inspectionDate).toISOString() : null;
+    
+    const finalData = {
+        drawing_no: formData.get('drawing_no'),
+        system_spec: formData.get('system_spec'),
+        line_no: formData.get('line_no'),
+        spool_no: formData.get('spool_no'),
+        joint_no: formData.get('joint_no'),
+        weld_type: formData.get('weld_type'),
+        inspection_result: formData.get('inspection_result'),
+        inspection_date: formattedDate,
+        inspection_operator: formData.get('inspection_operator'),
+        inspection_remark: formData.get('inspection_remark'),
+        wps_no: formData.get('wps_no'),
+        welder_no: formData.get('welder_no'),
+        final_report_no: formData.get('final_report_no'),
+        ndt_rt: formData.get('ndt_rt'),
+        ndt_pt: formData.get('ndt_pt'),
+        ndt_mt: formData.get('ndt_mt'),
+        fit_up_id: parseInt(formData.get('fit_up_id'))
+    };
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/final_inspections/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(finalData)
+        });
+        
+        if (!response.ok) throw new Error('Failed to create final inspection');
+        
+        const newFinal = await response.json();
+        finalInspections.push(newFinal);
+        renderFinalInspectionsTable();
+        updateDashboard();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('finalModal'));
+        modal.hide();
+        
+        alert('Final inspection created successfully!');
+    } catch (error) {
+        console.error('Error creating final inspection:', error);
+        alert('Error creating final inspection. Please try again.');
     }
 }
 
@@ -391,11 +620,104 @@ async function editFinal(id) {
         if (!response.ok) throw new Error('Failed to fetch final inspection');
         
         const final = await response.json();
-        alert(`Edit final inspection ${id} - Data loaded: ${JSON.stringify(final)}`);
-        // TODO: Implement final edit form
+        
+        // Fill the form with existing data
+        const form = document.getElementById('finalForm');
+        form.reset();
+        
+        // Set form field values
+        document.querySelector('input[name="drawing_no"]').value = final.drawing_no || '';
+        document.querySelector('input[name="system_spec"]').value = final.system_spec || '';
+        document.querySelector('input[name="line_no"]').value = final.line_no || '';
+        document.querySelector('input[name="spool_no"]').value = final.spool_no || '';
+        document.querySelector('input[name="joint_no"]').value = final.joint_no || '';
+        document.querySelector('select[name="weld_type"]').value = final.weld_type || '';
+        document.querySelector('select[name="inspection_result"]').value = final.inspection_result || '';
+        document.querySelector('input[name="wps_no"]').value = final.wps_no || '';
+        document.querySelector('input[name="welder_no"]').value = final.welder_no || '';
+        document.querySelector('input[name="final_report_no"]').value = final.final_report_no || '';
+        document.querySelector('input[name="ndt_rt"]').value = final.ndt_rt || '';
+        document.querySelector('input[name="ndt_pt"]').value = final.ndt_pt || '';
+        document.querySelector('input[name="ndt_mt"]').value = final.ndt_mt || '';
+        document.querySelector('input[name="fit_up_id"]').value = final.fit_up_id || '';
+        
+        // Format date for input field (YYYY-MM-DD)
+        const inspectionDate = final.inspection_date ? new Date(final.inspection_date).toISOString().split('T')[0] : '';
+        document.querySelector('input[name="inspection_date"]').value = inspectionDate;
+        
+        document.querySelector('input[name="inspection_operator"]').value = final.inspection_operator || '';
+        document.querySelector('textarea[name="inspection_remark"]').value = final.inspection_remark || '';
+        
+        // Show modal and set up update handler
+        const modal = new bootstrap.Modal(document.getElementById('finalModal'));
+        modal.show();
+        
+        // Change modal title and submit button
+        const modalTitle = document.querySelector('#finalModal .modal-title');
+        const submitBtn = document.querySelector('#finalModal .btn-primary');
+        
+        if (modalTitle) modalTitle.textContent = 'Edit Final Inspection';
+        if (submitBtn) {
+            submitBtn.textContent = 'Update Final';
+            submitBtn.onclick = () => updateFinal(id);
+        }
     } catch (error) {
         console.error('Error loading final for edit:', error);
         alert('Error loading final inspection for editing.');
+    }
+}
+
+// Update final inspection
+async function updateFinal(id) {
+    const form = document.getElementById('finalForm');
+    const formData = new FormData(form);
+    
+    // Format date to ISO string for backend
+    const inspectionDate = formData.get('inspection_date');
+    const formattedDate = inspectionDate ? new Date(inspectionDate).toISOString() : null;
+    
+    const finalData = {
+        drawing_no: formData.get('drawing_no'),
+        system_spec: formData.get('system_spec'),
+        line_no: formData.get('line_no'),
+        spool_no: formData.get('spool_no'),
+        joint_no: formData.get('joint_no'),
+        weld_type: formData.get('weld_type'),
+        inspection_result: formData.get('inspection_result'),
+        inspection_date: formattedDate,
+        inspection_operator: formData.get('inspection_operator'),
+        inspection_remark: formData.get('inspection_remark'),
+        wps_no: formData.get('wps_no'),
+        welder_no: formData.get('welder_no'),
+        final_report_no: formData.get('final_report_no'),
+        ndt_rt: formData.get('ndt_rt'),
+        ndt_pt: formData.get('ndt_pt'),
+        ndt_mt: formData.get('ndt_mt'),
+        fit_up_id: parseInt(formData.get('fit_up_id'))
+    };
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/final_inspections/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(finalData)
+        });
+        
+        if (!response.ok) throw new Error('Failed to update final inspection');
+        
+        const updatedFinal = await response.json();
+        finalInspections = finalInspections.map(f => f.id === id ? updatedFinal : f);
+        renderFinalInspectionsTable();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('finalModal'));
+        modal.hide();
+        
+        alert('Final inspection updated successfully!');
+    } catch (error) {
+        console.error('Error updating final inspection:', error);
+        alert('Error updating final inspection. Please try again.');
     }
 }
 

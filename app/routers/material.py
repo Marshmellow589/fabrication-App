@@ -34,13 +34,23 @@ def update_material_inspection(material_inspection_id: int, db: Session = Depend
     db_material_inspection = db.query(MaterialInspection).filter(MaterialInspection.id == material_inspection_id).first()
     if db_material_inspection is None:
         raise HTTPException(status_code=404, detail="Material inspection not found")
-    db_material_inspection.type_of_material = material_inspection.type_of_material
-    db_material_inspection.material_grade = material_inspection.material_grade
-    db_material_inspection.thickness = material_inspection.thickness
-    db_material_inspection.dia_for_pipe = material_inspection.dia_for_pipe
-    db_material_inspection.heat_no = material_inspection.heat_no
-    db_material_inspection.mvr_report_no = material_inspection.mvr_report_no
-    db_material_inspection.unique_piece_id = material_inspection.unique_piece_id
+    
+    # Update only the fields that are provided (not None)
+    if material_inspection.type_of_material is not None:
+        db_material_inspection.type_of_material = material_inspection.type_of_material
+    if material_inspection.material_grade is not None:
+        db_material_inspection.material_grade = material_inspection.material_grade
+    if material_inspection.thickness is not None:
+        db_material_inspection.thickness = material_inspection.thickness
+    if material_inspection.dia_for_pipe is not None:
+        db_material_inspection.dia_for_pipe = material_inspection.dia_for_pipe
+    if material_inspection.heat_no is not None:
+        db_material_inspection.heat_no = material_inspection.heat_no
+    if material_inspection.mvr_report_no is not None:
+        db_material_inspection.mvr_report_no = material_inspection.mvr_report_no
+    if material_inspection.unique_piece_id is not None:
+        db_material_inspection.unique_piece_id = material_inspection.unique_piece_id
+    
     db.commit()
     db.refresh(db_material_inspection)
     return db_material_inspection

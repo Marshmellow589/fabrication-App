@@ -34,18 +34,33 @@ def update_fit_up_inspection(fit_up_inspection_id: int, db: Session = Depends(ge
     db_fit_up_inspection = db.query(FitUpInspection).filter(FitUpInspection.id == fit_up_inspection_id).first()
     if db_fit_up_inspection is None:
         raise HTTPException(status_code=404, detail="Fit-up inspection not found")
-    db_fit_up_inspection.drawing_no = fit_up_inspection.drawing_no
-    db_fit_up_inspection.system_spec = fit_up_inspection.system_spec
-    db_fit_up_inspection.line_no = fit_up_inspection.line_no
-    db_fit_up_inspection.spool_no = fit_up_inspection.spool_no
-    db_fit_up_inspection.joint_no = fit_up_inspection.joint_no
-    db_fit_up_inspection.weld_type = fit_up_inspection.weld_type
-    db_fit_up_inspection.part1_unique_piece_id = fit_up_inspection.part1_unique_piece_id
-    db_fit_up_inspection.part2_unique_piece_id = fit_up_inspection.part2_unique_piece_id
-    db_fit_up_inspection.inspection_result = fit_up_inspection.inspection_result
-    db_fit_up_inspection.inspection_date = fit_up_inspection.inspection_date
-    db_fit_up_inspection.inspection_operator = fit_up_inspection.inspection_operator
-    db_fit_up_inspection.inspection_remark = fit_up_inspection.inspection_remark
+    
+    # Update only the fields that are provided (not None)
+    if fit_up_inspection.drawing_no is not None:
+        db_fit_up_inspection.drawing_no = fit_up_inspection.drawing_no
+    if fit_up_inspection.system_spec is not None:
+        db_fit_up_inspection.system_spec = fit_up_inspection.system_spec
+    if fit_up_inspection.line_no is not None:
+        db_fit_up_inspection.line_no = fit_up_inspection.line_no
+    if fit_up_inspection.spool_no is not None:
+        db_fit_up_inspection.spool_no = fit_up_inspection.spool_no
+    if fit_up_inspection.joint_no is not None:
+        db_fit_up_inspection.joint_no = fit_up_inspection.joint_no
+    if fit_up_inspection.weld_type is not None:
+        db_fit_up_inspection.weld_type = fit_up_inspection.weld_type
+    if fit_up_inspection.part1_unique_piece_id is not None:
+        db_fit_up_inspection.part1_unique_piece_id = fit_up_inspection.part1_unique_piece_id
+    if fit_up_inspection.part2_unique_piece_id is not None:
+        db_fit_up_inspection.part2_unique_piece_id = fit_up_inspection.part2_unique_piece_id
+    if fit_up_inspection.inspection_result is not None:
+        db_fit_up_inspection.inspection_result = fit_up_inspection.inspection_result
+    if fit_up_inspection.inspection_date is not None:
+        db_fit_up_inspection.inspection_date = fit_up_inspection.inspection_date
+    if fit_up_inspection.inspection_operator is not None:
+        db_fit_up_inspection.inspection_operator = fit_up_inspection.inspection_operator
+    if fit_up_inspection.inspection_remark is not None:
+        db_fit_up_inspection.inspection_remark = fit_up_inspection.inspection_remark
+    
     db.commit()
     db.refresh(db_fit_up_inspection)
     return db_fit_up_inspection
