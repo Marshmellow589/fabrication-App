@@ -1,14 +1,73 @@
-// API base URL
-const API_BASE_URL = 'http://localhost:8000';
+// API base URL - use relative paths for Vite proxy
+const API_BASE_URL = '';
 
 // Global state
 let materials = [];
 let fitUps = [];
 let finalInspections = [];
 let ndtRequests = [];
+let currentUser = null;
 
-// Initialize the application
+// Authentication functions
+function checkAuthentication() {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    return true;
+}
+
+function getAuthHeaders() {
+    const token = localStorage.getItem('access_token');
+    const tokenType = localStorage.getItem('token_type') || 'bearer';
+    return {
+        'Authorization': `${tokenType} ${token}`,
+        'Content-Type': 'application/json'
+    };
+}
+
+async function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('token_type');
+        localStorage.removeItem('current_user');
+        window.location.href = 'login.html';
+    }
+}
+
+function updateUserInterface() {
+    // Add user info to the interface
+    const userInfoElement = document.getElementById('user-info');
+    if (userInfoElement && currentUser) {
+        userInfoElement.innerHTML = `
+            <span class="me-2">Welcome, ${currentUser.full_name || currentUser.username}</span>
+            <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </button>
+        `;
+    }
+}
+
+// Initialize authentication
 document.addEventListener('DOMContentLoaded', function() {
+    // Check authentication before loading data
+    if (!checkAuthentication()) {
+        return;
+    }
+    
+    // Load user info (handle case where it might not be available)
+    const userData = localStorage.getItem('current_user');
+    if (userData) {
+        try {
+            currentUser = JSON.parse(userData);
+            updateUserInterface();
+        } catch (e) {
+            console.warn('Could not parse user data:', e);
+            // Continue without user info
+        }
+    }
+    
     loadAllData();
     setupEventListeners();
 });
@@ -45,14 +104,21 @@ async function loadAllData() {
         updateDashboard();
     } catch (error) {
         console.error('Error loading data:', error);
-        alert('Error loading data. Please check if the backend server is running.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error loading data. Please check if the backend server is running.');
+        }
     }
 }
 
 // Load materials
 async function loadMaterials() {
     try {
-        const response = await fetch(`${API_BASE_URL}/material_inspections/`);
+        const response = await fetch(`${API_BASE_URL}/material_inspections/`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error('Failed to fetch materials');
         
         materials = await response.json();
@@ -60,13 +126,19 @@ async function loadMaterials() {
         document.getElementById('material-count').textContent = materials.length;
     } catch (error) {
         console.error('Error loading materials:', error);
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        }
     }
 }
 
 // Load fit up inspections
 async function loadFitUps() {
     try {
-        const response = await fetch(`${API_BASE_URL}/fit_up_inspections/`);
+        const response = await fetch(`${API_BASE_URL}/fit_up_inspections/`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error('Failed to fetch fit up inspections');
         
         fitUps = await response.json();
@@ -74,13 +146,19 @@ async function loadFitUps() {
         document.getElementById('fitup-count').textContent = fitUps.length;
     } catch (error) {
         console.error('Error loading fit up inspections:', error);
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        }
     }
 }
 
 // Load final inspections
 async function loadFinalInspections() {
     try {
-        const response = await fetch(`${API_BASE_URL}/final_inspections/`);
+        const response = await fetch(`${API_BASE_URL}/final_inspections/`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error('Failed to fetch final inspections');
         
         finalInspections = await response.json();
@@ -88,13 +166,19 @@ async function loadFinalInspections() {
         document.getElementById('final-count').textContent = finalInspections.length;
     } catch (error) {
         console.error('Error loading final inspections:', error);
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        }
     }
 }
 
 // Load NDT requests
 async function loadNDTRequests() {
     try {
-        const response = await fetch(`${API_BASE_URL}/ndt_requests/`);
+        const response = await fetch(`${API_BASE_URL}/ndt_requests/`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error('Failed to fetch NDT requests');
         
         ndtRequests = await response.json();
@@ -102,6 +186,10 @@ async function loadNDTRequests() {
         document.getElementById('ndt-count').textContent = ndtRequests.length;
     } catch (error) {
         console.error('Error loading NDT requests:', error);
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        }
     }
 }
 
@@ -266,9 +354,7 @@ async function submitMaterialForm() {
     try {
         const response = await fetch(`${API_BASE_URL}/material_inspections/`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(materialData)
         });
         
@@ -285,7 +371,12 @@ async function submitMaterialForm() {
         alert('Material created successfully!');
     } catch (error) {
         console.error('Error creating material:', error);
-        alert('Error creating material. Please try again.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error creating material. Please try again.');
+        }
     }
 }
 
@@ -293,7 +384,9 @@ async function submitMaterialForm() {
 async function editMaterial(id) {
     try {
         console.log('Editing material with ID:', id);
-        const response = await fetch(`${API_BASE_URL}/material_inspections/${id}`);
+        const response = await fetch(`${API_BASE_URL}/material_inspections/${id}`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error('Failed to fetch material');
         
         const material = await response.json();
@@ -344,7 +437,12 @@ async function editMaterial(id) {
         }
     } catch (error) {
         console.error('Error loading material for edit:', error);
-        alert('Error loading material for editing. Check console for details.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error loading material for editing. Check console for details.');
+        }
     }
 }
 
@@ -366,9 +464,7 @@ async function updateMaterial(id) {
     try {
         const response = await fetch(`${API_BASE_URL}/material_inspections/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(materialData)
         });
         
@@ -384,7 +480,12 @@ async function updateMaterial(id) {
         alert('Material updated successfully!');
     } catch (error) {
         console.error('Error updating material:', error);
-        alert('Error updating material. Please try again.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error updating material. Please try again.');
+        }
     }
 }
 
@@ -394,7 +495,8 @@ async function deleteMaterial(id) {
     
     try {
         const response = await fetch(`${API_BASE_URL}/material_inspections/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
         
         if (!response.ok) throw new Error('Failed to delete material');
@@ -406,7 +508,12 @@ async function deleteMaterial(id) {
         alert('Material deleted successfully!');
     } catch (error) {
         console.error('Error deleting material:', error);
-        alert('Error deleting material. Please try again.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error deleting material. Please try again.');
+        }
     }
 }
 
@@ -437,9 +544,7 @@ async function submitFitUpForm() {
     try {
         const response = await fetch(`${API_BASE_URL}/fit_up_inspections/`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(fitUpData)
         });
         
@@ -456,14 +561,21 @@ async function submitFitUpForm() {
         alert('Fit up inspection created successfully!');
     } catch (error) {
         console.error('Error creating fit up inspection:', error);
-        alert('Error creating fit up inspection. Please try again.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error creating fit up inspection. Please try again.');
+        }
     }
 }
 
 // Edit fit up inspection
 async function editFitUp(id) {
     try {
-        const response = await fetch(`${API_BASE_URL}/fit_up_inspections/${id}`);
+        const response = await fetch(`${API_BASE_URL}/fit_up_inspections/${id}`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error('Failed to fetch fit up inspection');
         
         const fitUp = await response.json();
@@ -505,7 +617,12 @@ async function editFitUp(id) {
         }
     } catch (error) {
         console.error('Error loading fit up for edit:', error);
-        alert('Error loading fit up inspection for editing.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error loading fit up inspection for editing.');
+        }
     }
 }
 
@@ -536,9 +653,7 @@ async function updateFitUp(id) {
     try {
         const response = await fetch(`${API_BASE_URL}/fit_up_inspections/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(fitUpData)
         });
         
@@ -554,7 +669,40 @@ async function updateFitUp(id) {
         alert('Fit up inspection updated successfully!');
     } catch (error) {
         console.error('Error updating fit up inspection:', error);
-        alert('Error updating fit up inspection. Please try again.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error updating fit up inspection. Please try again.');
+        }
+    }
+}
+
+// Delete fit up inspection
+async function deleteFitUp(id) {
+    if (!confirm('Are you sure you want to delete this fit up inspection?')) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/fit_up_inspections/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+        
+        if (!response.ok) throw new Error('Failed to delete fit up inspection');
+        
+        fitUps = fitUps.filter(f => f.id !== id);
+        renderFitUpsTable();
+        updateDashboard();
+        
+        alert('Fit up inspection deleted successfully!');
+    } catch (error) {
+        console.error('Error deleting fit up inspection:', error);
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error deleting fit up inspection. Please try again.');
+        }
     }
 }
 
@@ -590,9 +738,7 @@ async function submitFinalForm() {
     try {
         const response = await fetch(`${API_BASE_URL}/final_inspections/`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(finalData)
         });
         
@@ -609,14 +755,21 @@ async function submitFinalForm() {
         alert('Final inspection created successfully!');
     } catch (error) {
         console.error('Error creating final inspection:', error);
-        alert('Error creating final inspection. Please try again.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error creating final inspection. Please try again.');
+        }
     }
 }
 
 // Edit final inspection
 async function editFinal(id) {
     try {
-        const response = await fetch(`${API_BASE_URL}/final_inspections/${id}`);
+        const response = await fetch(`${API_BASE_URL}/final_inspections/${id}`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error('Failed to fetch final inspection');
         
         const final = await response.json();
@@ -663,7 +816,12 @@ async function editFinal(id) {
         }
     } catch (error) {
         console.error('Error loading final for edit:', error);
-        alert('Error loading final inspection for editing.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error loading final inspection for editing.');
+        }
     }
 }
 
@@ -699,9 +857,7 @@ async function updateFinal(id) {
     try {
         const response = await fetch(`${API_BASE_URL}/final_inspections/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(finalData)
         });
         
@@ -717,44 +873,12 @@ async function updateFinal(id) {
         alert('Final inspection updated successfully!');
     } catch (error) {
         console.error('Error updating final inspection:', error);
-        alert('Error updating final inspection. Please try again.');
-    }
-}
-
-// Edit NDT request
-async function editNDT(id) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/ndt_requests/${id}`);
-        if (!response.ok) throw new Error('Failed to fetch NDT request');
-        
-        const ndt = await response.json();
-        alert(`Edit NDT request ${id} - Data loaded: ${JSON.stringify(ndt)}`);
-        // TODO: Implement NDT edit form
-    } catch (error) {
-        console.error('Error loading NDT for edit:', error);
-        alert('Error loading NDT request for editing.');
-    }
-}
-
-// Delete fit up inspection
-async function deleteFitUp(id) {
-    if (!confirm('Are you sure you want to delete this fit up inspection?')) return;
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/fit_up_inspections/${id}`, {
-            method: 'DELETE'
-        });
-        
-        if (!response.ok) throw new Error('Failed to delete fit up inspection');
-        
-        fitUps = fitUps.filter(f => f.id !== id);
-        renderFitUpsTable();
-        updateDashboard();
-        
-        alert('Fit up inspection deleted successfully!');
-    } catch (error) {
-        console.error('Error deleting fit up inspection:', error);
-        alert('Error deleting fit up inspection. Please try again.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error updating final inspection. Please try again.');
+        }
     }
 }
 
@@ -764,7 +888,8 @@ async function deleteFinal(id) {
     
     try {
         const response = await fetch(`${API_BASE_URL}/final_inspections/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
         
         if (!response.ok) throw new Error('Failed to delete final inspection');
@@ -776,7 +901,34 @@ async function deleteFinal(id) {
         alert('Final inspection deleted successfully!');
     } catch (error) {
         console.error('Error deleting final inspection:', error);
-        alert('Error deleting final inspection. Please try again.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error deleting final inspection. Please try again.');
+        }
+    }
+}
+
+// Edit NDT request
+async function editNDT(id) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/ndt_requests/${id}`, {
+            headers: getAuthHeaders()
+        });
+        if (!response.ok) throw new Error('Failed to fetch NDT request');
+        
+        const ndt = await response.json();
+        alert(`Edit NDT request ${id} - Data loaded: ${JSON.stringify(ndt)}`);
+        // TODO: Implement NDT edit form
+    } catch (error) {
+        console.error('Error loading NDT for edit:', error);
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error loading NDT request for editing.');
+        }
     }
 }
 
@@ -786,7 +938,8 @@ async function deleteNDT(id) {
     
     try {
         const response = await fetch(`${API_BASE_URL}/ndt_requests/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
         
         if (!response.ok) throw new Error('Failed to delete NDT request');
@@ -798,7 +951,12 @@ async function deleteNDT(id) {
         alert('NDT request deleted successfully!');
     } catch (error) {
         console.error('Error deleting NDT request:', error);
-        alert('Error deleting NDT request. Please try again.');
+        if (error.message.includes('401')) {
+            alert('Session expired. Please login again.');
+            logout();
+        } else {
+            alert('Error deleting NDT request. Please try again.');
+        }
     }
 }
 

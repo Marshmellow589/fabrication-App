@@ -6,7 +6,27 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
+      '/auth': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/material_inspections': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/fit_up_inspections': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/final_inspections': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/ndt_requests': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/users': {
         target: 'http://localhost:8000',
         changeOrigin: true
       }
