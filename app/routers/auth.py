@@ -66,7 +66,18 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(db_user)
         logger.info(f"Successfully registered user: {user.username}")
-        return db_user
+        
+        # Convert SQLAlchemy object to dictionary for proper JSON serialization
+        return {
+            "id": db_user.id,
+            "username": db_user.username,
+            "email": db_user.email,
+            "full_name": db_user.full_name,
+            "role": db_user.role,
+            "is_active": db_user.is_active,
+            "created_at": db_user.created_at,
+            "updated_at": db_user.updated_at
+        }
     except Exception as e:
         logger.error(f"Registration failed for {user.username}: {str(e)}", exc_info=True)
         raise HTTPException(

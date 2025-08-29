@@ -25,7 +25,18 @@ def register_user(
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    return db_user
+    
+    # Convert SQLAlchemy object to dictionary for proper JSON serialization
+    return {
+        "id": db_user.id,
+        "username": db_user.username,
+        "email": db_user.email,
+        "full_name": db_user.full_name,
+        "role": db_user.role,
+        "is_active": db_user.is_active,
+        "created_at": db_user.created_at,
+        "updated_at": db_user.updated_at
+    }
 
 # User login
 @router.post("/login", response_model=schemas.Token)
