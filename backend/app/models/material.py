@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Text
 from sqlalchemy.sql import func
 from backend.app.database import Base
-from datetime import datetime
+from datetime import date
 
 class Material(Base):
     __tablename__ = "materials"
@@ -15,5 +15,5 @@ class Material(Base):
     unit = Column(String(20))
     status = Column(String(20), default="pending")
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(Date, default=date.today, nullable=False)
+    updated_at = Column(Date, default=date.today, onupdate=date.today, nullable=False)

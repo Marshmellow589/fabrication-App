@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import date
 from typing import Optional
 
 class MaterialBase(BaseModel):
@@ -25,8 +25,8 @@ class MaterialUpdate(BaseModel):
 class Material(MaterialBase):
     id: int
     created_by: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: date
+    updated_at: date
 
     class Config:
         from_attributes = True

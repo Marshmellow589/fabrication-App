@@ -7,7 +7,8 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
-from backend.app import models, crud
+from backend.app import models
+from backend.app.crud.user import user as user_crud
 
 # Secret key for JWT encoding/decoding
 SECRET_KEY = "your-secret-key-here"  # In production, use environment variable
@@ -50,7 +51,7 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
     
-    user = crud.user.get_by_username(db, username=username)
+    user = user_crud.get_by_username(db, username=username)
     if user is None:
         raise credentials_exception
     return user

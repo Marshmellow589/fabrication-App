@@ -9,7 +9,7 @@ load_dotenv()
 # Use SQLite for testing instead of PostgreSQL
 SQLALCHEMY_DATABASE_URL = os.getenv(
     "DATABASE_URL", 
-    "sqlite:///./test.db"
+    "sqlite:///./test_material_R1.db"
 )
 
 engine = create_engine(
