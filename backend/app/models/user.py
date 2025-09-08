@@ -1,5 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, Enum
-from app.database import Base
+from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime, ForeignKey
+from sqlalchemy.sql import func
+from backend.app.database import Base
+from datetime import datetime, timedelta
 import enum
 
 class UserRole(str, enum.Enum):
@@ -11,10 +13,16 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    role = Column(Enum(UserRole), default=UserRole.VISITOR)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    validated_until = Column(DateTime, default=lambda: datetime.utcnow() + timedelta(days=30))
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    email = Column(String(100), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    full_name = Column(String(100), nullable=True)
+    role = Column(Enum(UserRole), default=UserRole.VISITOR, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    is_superuser = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    validated_until = Column(DateTime, default=lambda: datetime.utcnow() + timedelta(days=30), nullable=False)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    def is_validated(self):
+        return self.validated_until >= datetime.utcnow()
