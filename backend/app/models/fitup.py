@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, Boolean
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Text, Boolean
 from sqlalchemy.sql import func
 from backend.app.database import Base
-from datetime import datetime
+from datetime import date
 
 class Fitup(Base):
     __tablename__ = "fitups"
@@ -15,7 +15,7 @@ class Fitup(Base):
     status = Column(String(20), default="pending")
     is_approved = Column(Boolean, default=False)
     approved_by = Column(Integer, ForeignKey("users.id"))
-    approved_at = Column(DateTime)
+    approved_at = Column(Date)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(Date, default=date.today, nullable=False)
+    updated_at = Column(Date, default=date.today, onupdate=date.today, nullable=False)

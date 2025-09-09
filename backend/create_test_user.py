@@ -22,19 +22,19 @@ def create_test_user():
     db = SessionLocal()
     try:
         # Check if test user already exists
-        existing_user = db.query(User).filter(User.username == "admin1").first()
+        existing_user = db.query(User).filter(User.username == "testuser").first()
         if existing_user:
             print("Test user already exists:")
-            print(f"Username: admin1")
-            print(f"Password: admin123")
+            print(f"Username: testuser")
+            print(f"Password: testpassword")
             print(f"User ID: {existing_user.id}")
             return
         
         # Create test user
         test_user = User(
-            username="admin1",
-            email="admin1@example.com",
-            hashed_password=get_password_hash("admin123"),
+            username="testuser",
+            email="testuser@example.com",
+            hashed_password=get_password_hash("testpassword"),
             is_active=True
         )
         

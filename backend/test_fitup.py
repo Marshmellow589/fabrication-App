@@ -14,12 +14,12 @@ from backend.create_test_user import create_test_user
 
 def test_fitup_api():
     # Base URL for the API
-    BASE_URL = "http://127.0.0.1:8007"
+    BASE_URL = "http://127.0.0.1:8008"
     
     # First, get an authentication token
     auth_data = {
-        "username": "admin1",
-        "password": "admin123"
+        "username": "testuser",
+        "password": "testpassword"
     }
     
     try:

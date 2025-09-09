@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import date
 from typing import Optional
 
 class NDTRequestBase(BaseModel):
@@ -27,10 +27,10 @@ class NDTRequest(NDTRequestBase):
     remarks: Optional[str] = None
     is_completed: bool
     completed_by: Optional[int] = None
-    completed_at: Optional[datetime] = None
+    completed_at: Optional[date] = None
     created_by: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: date
+    updated_at: date
 
     class Config:
         from_attributes = True
