@@ -4,20 +4,44 @@ from typing import Optional
 
 class FitupBase(BaseModel):
     project_id: int
-    fitup_number: str
-    component_a: Optional[str] = None
-    component_b: Optional[str] = None
+    drawing_no: Optional[str] = None
+    line_no: Optional[str] = None
+    spool_no: Optional[str] = None
+    joint_no: Optional[str] = None
+    weld_type: Optional[str] = None
+    part1_thickness: Optional[float] = None
+    part1_grade: Optional[str] = None
+    part1_size: Optional[str] = None
+    part2_thickness: Optional[float] = None
+    part2_grade: Optional[str] = None
+    part2_size: Optional[str] = None
     joint_type: Optional[str] = None
+    work_site: Optional[str] = None
+    fitup_inspection_date: Optional[date] = None
+    fitup_report_no: Optional[str] = None
+    fitup_result: Optional[str] = None
     status: str = "pending"
 
 class FitupCreate(FitupBase):
     pass
 
 class FitupUpdate(BaseModel):
-    fitup_number: Optional[str] = None
-    component_a: Optional[str] = None
-    component_b: Optional[str] = None
+    drawing_no: Optional[str] = None
+    line_no: Optional[str] = None
+    spool_no: Optional[str] = None
+    joint_no: Optional[str] = None
+    weld_type: Optional[str] = None
+    part1_thickness: Optional[float] = None
+    part1_grade: Optional[str] = None
+    part1_size: Optional[str] = None
+    part2_thickness: Optional[float] = None
+    part2_grade: Optional[str] = None
+    part2_size: Optional[str] = None
     joint_type: Optional[str] = None
+    work_site: Optional[str] = None
+    fitup_inspection_date: Optional[date] = None
+    fitup_report_no: Optional[str] = None
+    fitup_result: Optional[str] = None
     status: Optional[str] = None
     is_approved: Optional[bool] = None
 

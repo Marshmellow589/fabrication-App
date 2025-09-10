@@ -39,11 +39,42 @@ def create_fitup(
     """
     Create new fitup.
     """
-    # Convert the input schema to a dict and add the created_by field
-    fitup_data = fitup_in.dict()
-    fitup_data["created_by"] = current_user.id
-    fitup = fitup_crud.create(db=db, obj_in=fitup_data)
-    return fitup
+    # Create a clean dictionary with only the fields we want to include
+    fitup_data = {
+        "project_id": fitup_in.project_id,
+        "drawing_no": fitup_in.drawing_no,
+        "line_no": fitup_in.line_no,
+        "spool_no": fitup_in.spool_no,
+        "joint_no": fitup_in.joint_no,
+        "weld_type": fitup_in.weld_type,
+        "part1_thickness": fitup_in.part1_thickness,
+        "part1_grade": fitup_in.part1_grade,
+        "part1_size": fitup_in.part1_size,
+        "part2_thickness": fitup_in.part2_thickness,
+        "part2_grade": fitup_in.part2_grade,
+        "part2_size": fitup_in.part2_size,
+        "joint_type": fitup_in.joint_type,
+        "work_site": fitup_in.work_site,
+        "fitup_report_no": fitup_in.fitup_report_no,
+        "fitup_result": fitup_in.fitup_result,
+        "status": fitup_in.status,
+        "created_by": current_user.id
+    }
+    
+    # Convert date strings to date objects for SQLite compatibility
+    if fitup_in.fitup_inspection_date:
+        if isinstance(fitup_in.fitup_inspection_date, str):
+            from datetime import datetime
+            fitup_data["fitup_inspection_date"] = datetime.strptime(fitup_in.fitup_inspection_date, "%Y-%m-%d").date()
+        else:
+            fitup_data["fitup_inspection_date"] = fitup_in.fitup_inspection_date
+    
+    # Create the fitup object directly instead of using the CRUD base class
+    fitup_obj = fitup_crud.model(**fitup_data)
+    db.add(fitup_obj)
+    db.commit()
+    db.refresh(fitup_obj)
+    return fitup_obj
 
 @router.get("/{fitup_id}", response_model=schemas.Fitup)
 def read_fitup(
@@ -79,7 +110,20 @@ def update_fitup(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Fitup not found"
         )
-    fitup = fitup_crud.update(db, db_obj=fitup, obj_in=fitup_in)
+    
+    # Convert date strings to date objects for SQLite compatibility
+    update_data = fitup_in.dict(exclude_unset=True)
+    if update_data.get("fitup_inspection_date") and isinstance(update_data["fitup_inspection_date"], str):
+        from datetime import datetime
+        update_data["fitup_inspection_date"] = datetime.strptime(update_data["fitup_inspection_date"], "%Y-%m-%d").date()
+    
+    # Update the object directly instead of using the CRUD base class
+    for field, value in update_data.items():
+        setattr(fitup, field, value)
+    
+    db.add(fitup)
+    db.commit()
+    db.refresh(fitup)
     return fitup
 
 @router.delete("/{fitup_id}", response_model=schemas.Fitup)

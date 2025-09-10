@@ -1,0 +1,34 @@
+{
+  "name": "fabrication-app-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Fabrication Management System",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "vite --host 0.0.0.0 --port 3000"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.0",
+    "axios": "^1.3.0",
+    "@reduxjs/toolkit": "^1.9.0",
+    "react-redux": "^8.0.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "@vitejs/plugin-react": "^3.1.0",
+    "vite": "^4.1.0"
+  },
+  "keywords": [
+    "react",
+    "vite",
+    "fabrication",
+    "management"
+  ],
+  "author": "Fabrication App Team",
+  "license": "MIT"
+}

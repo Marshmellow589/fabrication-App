@@ -5,10 +5,13 @@ from typing import Optional
 class MaterialBase(BaseModel):
     project_id: int
     material_type: str
-    specification: Optional[str] = None
-    grade: Optional[str] = None
-    quantity: Optional[float] = None
-    unit: Optional[str] = None
+    material_grade: Optional[str] = None
+    thickness: Optional[float] = None
+    size: Optional[str] = None
+    heat_no: Optional[str] = None
+    material_inspection_date: Optional[date] = None
+    material_inspection_result: Optional[str] = None
+    material_report_no: Optional[str] = None
     status: str = "pending"
 
 class MaterialCreate(MaterialBase):
@@ -16,10 +19,13 @@ class MaterialCreate(MaterialBase):
 
 class MaterialUpdate(BaseModel):
     material_type: Optional[str] = None
-    specification: Optional[str] = None
-    grade: Optional[str] = None
-    quantity: Optional[float] = None
-    unit: Optional[str] = None
+    material_grade: Optional[str] = None
+    thickness: Optional[float] = None
+    size: Optional[str] = None
+    heat_no: Optional[str] = None
+    material_inspection_date: Optional[date] = None
+    material_inspection_result: Optional[str] = None
+    material_report_no: Optional[str] = None
     status: Optional[str] = None
 
 class Material(MaterialBase):

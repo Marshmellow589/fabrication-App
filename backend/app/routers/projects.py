@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app import crud, models, schemas
+from backend.app import models, schemas
+from backend.app.crud import project_crud
 from backend.app.database import get_db
 from backend.app.core.security import get_current_active_user
 
@@ -17,7 +18,7 @@ def read_projects(
     """
     Retrieve projects.
     """
-    projects = crud.project.get_multi(db, skip=skip, limit=limit)
+    projects = project_crud.get_multi(db, skip=skip, limit=limit)
     return projects
 
 @router.post("/", response_model=schemas.Project)
@@ -30,7 +31,7 @@ def create_project(
     """
     Create new project.
     """
-    project = crud.project.create(db, obj_in=project_in)
+    project = project_crud.create(db, obj_in=project_in)
     return project
 
 @router.get("/{project_id}", response_model=schemas.Project)
@@ -42,7 +43,7 @@ def read_project(
     """
     Get project by ID.
     """
-    project = crud.project.get(db, id=project_id)
+    project = project_crud.get(db, id=project_id)
     if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -61,13 +62,13 @@ def update_project(
     """
     Update a project.
     """
-    project = crud.project.get(db, id=project_id)
+    project = project_crud.get(db, id=project_id)
     if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
         )
-    project = crud.project.update(db, db_obj=project, obj_in=project_in)
+    project = project_crud.update(db, db_obj=project, obj_in=project_in)
     return project
 
 @router.delete("/{project_id}")
@@ -80,11 +81,11 @@ def delete_project(
     """
     Delete a project.
     """
-    project = crud.project.get(db, id=project_id)
+    project = project_crud.get(db, id=project_id)
     if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
         )
-    crud.project.remove(db, id=project_id)
+    project_crud.remove(db, id=project_id)
     return {"message": "Project deleted successfully"}
