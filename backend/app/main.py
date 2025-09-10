@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from backend.app.routers import auth, user, projects, material, fitup, final, ndt
+from backend.app.routers import auth, user, projects, material, fitup, final, ndt, export, dashboard
 from backend.app.database import engine, Base
 import logging
 
@@ -12,8 +12,6 @@ app = FastAPI(
     description="检验数据管理平台API",
     version="1.0.0"
 )
-app.include_router(projects.router)
-
 # CORS配置
 app.add_middleware(
     CORSMiddleware,
@@ -31,6 +29,8 @@ app.include_router(material.router, prefix="/material", tags=["Material Inspecti
 app.include_router(fitup.router, prefix="/fitup", tags=["Fitup Inspection"])
 app.include_router(final.router, prefix="/final", tags=["Final Inspection"])
 app.include_router(ndt.router, prefix="/ndt", tags=["NDT Requests"])
+app.include_router(export.router, prefix="/export", tags=["Export"])
+app.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 
 @app.get("/")
 def read_root():
