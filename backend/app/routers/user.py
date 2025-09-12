@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.database import get_db
-from backend.app.core.security import get_current_active_user
-from backend.app import schemas
-from backend.app.crud.user import user as user_crud
+from app.database import get_db
+from app.core.security import get_current_active_user
+from app import schemas
+from app.crud.user import user as user_crud
 
 router = APIRouter()
 
@@ -47,6 +47,15 @@ def read_users(
     """
     users = user_crud.get_multi(db, skip=skip, limit=limit)
     return users
+
+@router.get("/me", response_model=schemas.User)
+def read_current_user(
+    current_user: schemas.User = Depends(get_current_active_user)
+):
+    """
+    Get current user information.
+    """
+    return current_user
 
 @router.get("/{user_id}", response_model=schemas.User)
 def read_user(

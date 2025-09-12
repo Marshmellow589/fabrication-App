@@ -1,8 +1,36 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import apiConfig from '../config/api'
 
 const Dashboard = () => {
   const navigate = useNavigate()
+  const [username, setUsername] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchCurrentUser()
+  }, [])
+
+  const fetchCurrentUser = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${apiConfig.BASE_URL}/users/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const userData = await response.json()
+        setUsername(userData.username)
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -17,9 +45,12 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <div className="dashboard-header">
         <h1>Dashboard</h1>
-        <button onClick={handleLogout} className="logout-button-top-right">
-          Logout
-        </button>
+        <div className="user-info">
+          {username && <span className="welcome-user">Welcome, {username}</span>}
+          <button onClick={handleLogout} className="logout-button-top-right">
+            Logout
+          </button>
+        </div>
       </div>
       <div className="dashboard-content">
         <h2>Welcome to Fabrication Management System</h2>

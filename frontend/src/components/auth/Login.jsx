@@ -16,14 +16,20 @@ const Login = () => {
     setError('')
 
     try {
-      const response = await axios.post(`${apiConfig.ENDPOINTS.AUTH}/token`, {
-        username,
-        password
-      }, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+      // Use URLSearchParams for form data as required by FastAPI OAuth2
+      const formData = new URLSearchParams()
+      formData.append('username', username)
+      formData.append('password', password)
+      formData.append('grant_type', 'password')
+
+      const response = await axios.post(`${apiConfig.ENDPOINTS.AUTH}/token`, 
+        formData.toString(),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
         }
-      })
+      )
 
       const token = response.data.access_token
       localStorage.setItem('token', token)
@@ -33,7 +39,7 @@ const Login = () => {
       
     } catch (err) {
       setError('Invalid username or password')
-      console.error('Login error:', err)
+      console.error('Login error:', err.response?.data || err.message)
     } finally {
       setLoading(false)
     }

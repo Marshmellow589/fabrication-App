@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_BASE_URL } from '../config/api'
+import apiConfig from '../config/api'
 
 const Users = () => {
   const [users, setUsers] = useState([])
@@ -25,7 +25,7 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`${API_BASE_URL}/users/`, {
+      const response = await fetch(`${apiConfig.BASE_URL}/users/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -53,7 +53,7 @@ const Users = () => {
     e.preventDefault()
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`${API_BASE_URL}/users/${editingUser.id}`, {
+      const response = await fetch(`${apiConfig.BASE_URL}/users/${editingUser.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -82,7 +82,7 @@ const Users = () => {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      const response = await fetch(`${apiConfig.BASE_URL}/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -104,7 +104,7 @@ const Users = () => {
     e.preventDefault()
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`${API_BASE_URL}/users/`, {
+      const response = await fetch(`${apiConfig.BASE_URL}/users/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
