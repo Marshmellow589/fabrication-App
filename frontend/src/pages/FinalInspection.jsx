@@ -458,7 +458,7 @@ const FinalInspection = () => {
         )}
 
         <div className="data-table">
-          <table>
+          <table className="final-inspection-table">
             <thead>
               <tr>
                 <th>ID</th>

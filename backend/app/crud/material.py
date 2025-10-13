@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from backend.app.crud.base import CRUDBase
-from backend.app.models.material import Material
-from backend.app.schemas.material import MaterialCreate, MaterialUpdate
+from .base import CRUDBase
+from ..models.material import Material
+from ..schemas.material import MaterialCreate, MaterialUpdate
 
 
 class CRUDMaterial(CRUDBase[Material, MaterialCreate, MaterialUpdate]):

@@ -1,0 +1,11 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+loguru==0.7.2
+langchain-core==0.1.38
+langgraph==0.0.34
+ollama==0.5.4
+sqlalchemy==2.0.25
+pydantic==2.5.0
+pydantic-settings==2.2.1
+pyjwt==2.8.0
+requests==2.32.5

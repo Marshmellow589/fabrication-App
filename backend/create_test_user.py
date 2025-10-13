@@ -11,9 +11,9 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from sqlalchemy.orm import Session
-from backend.app.database import SessionLocal, engine, Base
-from backend.app.models.user import User
-from backend.app.core.security import get_password_hash
+from app.database import SessionLocal, engine, Base
+from app.models.user import User
+from app.core.security import get_password_hash
 
 def create_test_user():
     # Create database tables if they don't exist

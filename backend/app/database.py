@@ -6,12 +6,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Use SQLite for testing instead of PostgreSQL
-SQLALCHEMY_DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "sqlite:///./fabrication_app.db"
-)
+# Force SQLite for testing since Docker is not available
+SQLALCHEMY_DATABASE_URL = "sqlite:///./fabrication_app.db"
 
+# Use check_same_thread for SQLite
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, 
     connect_args={"check_same_thread": False}  # Needed for SQLite

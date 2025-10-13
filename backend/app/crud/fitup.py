@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from backend.app.crud.base import CRUDBase
-from backend.app.models.fitup import Fitup
-from backend.app.schemas.fitup import FitupCreate, FitupUpdate
+from .base import CRUDBase
+from ..models.fitup import Fitup
+from ..schemas.fitup import FitupCreate, FitupUpdate
 
 
 class CRUDFitup(CRUDBase[Fitup, FitupCreate, FitupUpdate]):

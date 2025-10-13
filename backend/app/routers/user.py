@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.core.security import get_current_active_user
-from app import schemas
-from app.crud.user import user as user_crud
+from ..database import get_db
+from ..core.security import get_current_active_user
+from .. import schemas
+from ..crud.user import user as user_crud
 
 router = APIRouter()
 
@@ -33,7 +33,8 @@ def create_user(
         )
     
     user = user_crud.create(db, obj_in=user_in)
-    return user
+    # Convert SQLAlchemy model to Pydantic model
+    return schemas.User.from_orm(user)
 
 @router.get("/", response_model=list[schemas.User])
 def read_users(
@@ -46,7 +47,8 @@ def read_users(
     Retrieve users.
     """
     users = user_crud.get_multi(db, skip=skip, limit=limit)
-    return users
+    # Convert SQLAlchemy models to Pydantic models
+    return [schemas.User.from_orm(user) for user in users]
 
 @router.get("/me", response_model=schemas.User)
 def read_current_user(
@@ -72,7 +74,8 @@ def read_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
-    return user
+    # Convert SQLAlchemy model to Pydantic model
+    return schemas.User.from_orm(user)
 
 @router.put("/{user_id}", response_model=schemas.User)
 def update_user(
@@ -110,7 +113,8 @@ def update_user(
             )
     
     updated_user = user_crud.update(db, db_obj=user, obj_in=user_in)
-    return updated_user
+    # Convert SQLAlchemy model to Pydantic model
+    return schemas.User.from_orm(updated_user)
 
 @router.delete("/{user_id}")
 def delete_user(

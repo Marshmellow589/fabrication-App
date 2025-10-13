@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from backend.app.crud.base import CRUDBase
-from backend.app.models.project import Project
-from backend.app.schemas.projects import ProjectCreate, ProjectUpdate
+from .base import CRUDBase
+from ..models.project import Project
+from ..schemas.projects import ProjectCreate, ProjectUpdate
 
 
 class CRUDProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):

@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from backend.app.crud.base import CRUDBase
-from backend.app.models.ndt_request import NDTRequest
-from backend.app.schemas.ndt_request import NDTRequestCreate, NDTRequestUpdate
+from .base import CRUDBase
+from ..models.ndt_request import NDTRequest
+from ..schemas.ndt_request import NDTRequestCreate, NDTRequestUpdate
 
 
 class CRUDNDTRequest(CRUDBase[NDTRequest, NDTRequestCreate, NDTRequestUpdate]):

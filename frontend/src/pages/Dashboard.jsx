@@ -38,7 +38,18 @@ const Dashboard = () => {
   }
 
   const navigateToModule = (module) => {
-    navigate(`/${module.toLowerCase()}`)
+    // Handle special cases for route mapping
+    const routeMap = {
+      'final-inspection': 'final',
+      'ndt-request': 'ndt',
+      'materials': 'materials',
+      'fitup': 'fitup',
+      'projects': 'projects',
+      'users': 'users'
+    }
+    
+    const route = routeMap[module.toLowerCase()] || module.toLowerCase()
+    navigate(`/${route}`)
   }
 
   return (
@@ -72,12 +83,12 @@ const Dashboard = () => {
             <p>Manage fit-up inspections</p>
           </div>
           
-          <div className="dashboard-card" onClick={() => navigateToModule('final')}>
+          <div className="dashboard-card" onClick={() => navigateToModule('final-inspection')}>
             <h3>Final Inspection</h3>
             <p>Final quality checks</p>
           </div>
           
-          <div className="dashboard-card" onClick={() => navigateToModule('ndt')}>
+          <div className="dashboard-card" onClick={() => navigateToModule('ndt-request')}>
             <h3>NDT Requests</h3>
             <p>Non-destructive testing requests</p>
           </div>

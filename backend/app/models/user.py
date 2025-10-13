@@ -1,11 +1,12 @@
 from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime, ForeignKey
 from sqlalchemy.sql import func
-from backend.app.database import Base
+from ..database import Base
 from datetime import datetime, timedelta
 import enum
 
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
+    QA_MANAGER = "qa_manager"
     INSPECTOR = "inspector"
     MEMBER = "member"
     VISITOR = "visitor"

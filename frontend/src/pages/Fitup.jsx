@@ -9,6 +9,16 @@ const Fitup = () => {
   const [error, setError] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingFitup, setEditingFitup] = useState(null)
+  const [selectedRecords, setSelectedRecords] = useState(new Set())
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [exportForm, setExportForm] = useState({
+    project: '',
+    location: '',
+    report_no: '',
+    drawing_no: '',
+    inspector: '',
+    date: new Date().toISOString().split('T')[0]
+  })
   const navigate = useNavigate()
 
   // Form state
@@ -185,6 +195,100 @@ const Fitup = () => {
     navigate('/dashboard')
   }
 
+  const handleRecordSelect = (id) => {
+    const newSelected = new Set(selectedRecords)
+    if (newSelected.has(id)) {
+      newSelected.delete(id)
+    } else {
+      newSelected.add(id)
+    }
+    setSelectedRecords(newSelected)
+  }
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedRecords(new Set(fitups.map(fitup => fitup.id)))
+    } else {
+      setSelectedRecords(new Set())
+    }
+  }
+
+  const handleExportInputChange = (e) => {
+    const { name, value } = e.target
+    setExportForm(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleExportPDF = async () => {
+    if (selectedRecords.size === 0) {
+      alert('Please select at least one record to export')
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('token')
+      const exportData = {
+        record_ids: Array.from(selectedRecords),
+        project: exportForm.project,
+        location: exportForm.location,
+        report_no: exportForm.report_no,
+        drawing_no: exportForm.drawing_no,
+        inspector: exportForm.inspector,
+        date: exportForm.date
+      }
+
+      const response = await axios.post(
+        `${apiConfig.ENDPOINTS.EXPORT}/pdf/fitups`,
+        exportData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          responseType: 'blob'
+        }
+      )
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `fitup_report_${exportForm.report_no}_${new Date().toISOString().slice(0, 10)}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+
+      // Close modal and reset
+      setShowExportModal(false)
+      setExportForm({
+        project: '',
+        location: '',
+        report_no: '',
+        drawing_no: '',
+        inspector: '',
+        date: new Date().toISOString().split('T')[0]
+      })
+
+    } catch (err) {
+      console.error('Error exporting PDF:', err)
+      alert('Failed to export PDF. Please try again.')
+    }
+  }
+
+  const handleCancelExport = () => {
+    setShowExportModal(false)
+    setExportForm({
+      project: '',
+      location: '',
+      report_no: '',
+      drawing_no: '',
+      inspector: '',
+      date: new Date().toISOString().split('T')[0]
+    })
+  }
+
   if (loading) return <div className="loading">Loading fitup records...</div>
   if (error) return <div className="error">{error}</div>
 
@@ -205,6 +309,15 @@ const Fitup = () => {
           >
             + Add New Fitup
           </button>
+          
+          {selectedRecords.size > 0 && (
+            <button 
+              className="export-button" 
+              onClick={() => setShowExportModal(true)}
+            >
+              📄 Export Selected ({selectedRecords.size})
+            </button>
+          )}
         </div>
 
         {showAddForm && (
@@ -395,6 +508,13 @@ const Fitup = () => {
           <table>
             <thead>
               <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    onChange={handleSelectAll}
+                    checked={selectedRecords.size === fitups.length && fitups.length > 0}
+                  />
+                </th>
                 <th>ID</th>
                 <th>Drawing No</th>
                 <th>Line No</th>
@@ -415,6 +535,13 @@ const Fitup = () => {
             <tbody>
               {fitups.map((fitup) => (
                 <tr key={fitup.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedRecords.has(fitup.id)}
+                      onChange={() => handleRecordSelect(fitup.id)}
+                    />
+                  </td>
                   <td>{fitup.id}</td>
                   <td>{fitup.drawing_no || 'N/A'}</td>
                   <td>{fitup.line_no || 'N/A'}</td>
@@ -454,6 +581,81 @@ const Fitup = () => {
         {fitups.length === 0 && !showAddForm && (
           <div className="no-data">
             <p>No fitup inspections found.</p>
+          </div>
+        )}
+
+        {showExportModal && (
+          <div className="modal-overlay">
+            <div className="modal-container">
+              <h2>Export Fit-Up Report to PDF</h2>
+              <div className="modal-form">
+                <div className="form-group">
+                  <label>Project Name *</label>
+                  <input
+                    type="text"
+                    name="project"
+                    value={exportForm.project}
+                    onChange={handleExportInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Location *</label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={exportForm.location}
+                    onChange={handleExportInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Report Number *</label>
+                  <input
+                    type="text"
+                    name="report_no"
+                    value={exportForm.report_no}
+                    onChange={handleExportInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Drawing Number</label>
+                  <input
+                    type="text"
+                    name="drawing_no"
+                    value={exportForm.drawing_no}
+                    onChange={handleExportInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Inspector Name</label>
+                  <input
+                    type="text"
+                    name="inspector"
+                    value={exportForm.inspector}
+                    onChange={handleExportInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Date</label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={exportForm.date}
+                    onChange={handleExportInputChange}
+                  />
+                </div>
+              </div>
+              <div className="modal-buttons">
+                <button onClick={handleExportPDF} className="export-btn">
+                  Export PDF
+                </button>
+                <button onClick={handleCancelExport} className="cancel-btn">
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Text, Boolean
 from sqlalchemy.sql import func
-from backend.app.database import Base
+from ..database import Base
 from datetime import date
 
 class NDTRequest(Base):

@@ -21,8 +21,8 @@ def test_member_operations():
     
     # Test authentication with MEMBER user
     auth_data = {
-        "username": "MEMBER",
-        "password": "member123"
+        "username": "user3",
+        "password": "user3123"
     }
     
     try:

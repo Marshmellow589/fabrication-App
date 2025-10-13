@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from app.models.audit_trail import AuditTrail
-from app.schemas.audit_trail import AuditTrailCreate, AuditTrailFilter
+from ..models.audit_trail import AuditTrail
+from ..schemas.audit_trail import AuditTrailCreate, AuditTrailFilter
 from datetime import datetime
 
 class AuditTrailCRUD:

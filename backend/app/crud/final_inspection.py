@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from backend.app.crud.base import CRUDBase
-from backend.app.models.final_inspection import FinalInspection
-from backend.app.schemas.final_inspection import FinalInspectionCreate, FinalInspectionUpdate
+from .base import CRUDBase
+from ..models.final_inspection import FinalInspection
+from ..schemas.final_inspection import FinalInspectionCreate, FinalInspectionUpdate
 
 
 class CRUDFinalInspection(CRUDBase[FinalInspection, FinalInspectionCreate, FinalInspectionUpdate]):

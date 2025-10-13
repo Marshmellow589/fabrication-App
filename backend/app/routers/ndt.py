@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.database import get_db
-from backend.app.core.security import get_current_active_user
-from backend.app import schemas
-from backend.app.crud.ndt_request import ndt_request as ndt_request_crud
-from backend.app.crud.final_inspection import final_inspection as final_inspection_crud
+from ..database import get_db
+from ..core.security import get_current_active_user
+from .. import schemas
+from ..crud.ndt_request import ndt_request as ndt_request_crud
+from ..crud.final_inspection import final_inspection as final_inspection_crud
 
 router = APIRouter()
 

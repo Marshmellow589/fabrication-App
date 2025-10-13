@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from app.database import get_db
-from app.core.security import get_current_active_user
-from app import schemas
-from app.crud.audit_trail import audit_trail as audit_trail_crud
-from app.schemas.audit_trail import AuditTrail, AuditTrailFilter
+from ..database import get_db
+from ..core.security import get_current_active_user
+from .. import schemas
+from ..crud.audit_trail import audit_trail as audit_trail_crud
+from ..schemas.audit_trail import AuditTrail, AuditTrailFilter
 
 router = APIRouter()
 

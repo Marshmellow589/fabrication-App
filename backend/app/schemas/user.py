@@ -5,6 +5,8 @@ from enum import Enum
 
 class UserRole(str, Enum):
     ADMIN = "admin"
+    QA_MANAGER = "qa_manager"
+    INSPECTOR = "inspector"
     MEMBER = "member"
     VISITOR = "visitor"
 
@@ -29,8 +31,10 @@ class UserUpdate(BaseModel):
 class User(UserBase):
     id: int
     is_active: bool
+    is_superuser: bool
     created_at: datetime
     validated_until: datetime
+    created_by: Optional[int] = None
 
     class Config:
         from_attributes = True

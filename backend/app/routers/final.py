@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.database import get_db
-from backend.app.core.security import get_current_active_user
-from backend.app import schemas
-from backend.app.crud.final_inspection import final_inspection as final_inspection_crud
-from backend.app.crud.fitup import fitup as fitup_crud
+from ..database import get_db
+from ..core.security import get_current_active_user
+from .. import schemas
+from ..crud.final_inspection import final_inspection as final_inspection_crud
+from ..crud.fitup import fitup as fitup_crud
+from ..crud.ndt_request import ndt_request as ndt_request_crud
 
 router = APIRouter()
 
@@ -176,3 +177,49 @@ def get_fitup_data_for_final_inspection(
     )
     
     return final_inspection_data
+
+@router.post("/{inspection_id}/request-ndt", response_model=schemas.NDTRequest)
+def request_ndt_from_final_inspection(
+    inspection_id: int,
+    ndt_method: str,
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_active_user)
+):
+    """
+    Create NDT request from final inspection record.
+    """
+    final_inspection = final_inspection_crud.get(db, id=inspection_id)
+    if not final_inspection:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Final inspection record not found"
+        )
+    
+    # Create NDT request data from final inspection
+    ndt_data = {
+        "project_id": final_inspection.project_id,
+        "line_no": final_inspection.line_no,
+        "spool_no": final_inspection.spool_no,
+        "joint_no": final_inspection.joint_no,
+        "weld_process": final_inspection.weld_process,
+        "welder_no": final_inspection.welder_no,
+        "weld_length": final_inspection.weld_length,
+        "ndt_method": ndt_method,
+        "ndt_result": "pending",
+        "status": "requested",
+        "created_by": current_user.id
+    }
+    
+    # Create the NDT request object directly instead of using the CRUD base class
+    ndt_request_obj = ndt_request_crud.model(**ndt_data)
+    db.add(ndt_request_obj)
+    db.commit()
+    db.refresh(ndt_request_obj)
+    
+    # Update final inspection status to indicate NDT has been requested
+    final_inspection.status = "ndt_requested"
+    db.add(final_inspection)
+    db.commit()
+    db.refresh(final_inspection)
+    
+    return ndt_request_obj

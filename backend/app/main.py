@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from backend.app.routers import auth, user, projects, material, fitup, final, ndt, export, dashboard
-from backend.app.database import engine, Base
+from .routers import auth, user, projects, material, fitup, final, ndt, export, dashboard, audit_trail
+from .database import engine, Base
 import logging
 
 # 创建数据库表
@@ -31,6 +31,7 @@ app.include_router(final.router, prefix="/final", tags=["Final Inspection"])
 app.include_router(ndt.router, prefix="/ndt", tags=["NDT Requests"])
 app.include_router(export.router, prefix="/export", tags=["Export"])
 app.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
+app.include_router(audit_trail.router, prefix="/audit", tags=["Audit Trail"])
 
 @app.get("/")
 def read_root():
