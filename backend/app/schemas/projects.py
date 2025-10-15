@@ -1,21 +1,31 @@
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 
 class ProjectBase(BaseModel):
-    name: str
-    code: str
-    storage_quota_gb: int
-    used_storage_mb: float = 0.0
+    project_number: str
+    project_name: str
+    client: str
+    start_date: date
+    end_date: Optional[date] = None
+    status: str = "active"
+    project_manager: str
+    description: Optional[str] = None
+    budget: Optional[float] = None
 
 class ProjectCreate(ProjectBase):
     pass
 
 class ProjectUpdate(BaseModel):
-    name: Optional[str] = None
-    code: Optional[str] = None
-    storage_quota_gb: Optional[int] = None
-    used_storage_mb: Optional[float] = None
+    project_number: Optional[str] = None
+    project_name: Optional[str] = None
+    client: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    status: Optional[str] = None
+    project_manager: Optional[str] = None
+    description: Optional[str] = None
+    budget: Optional[float] = None
 
 class Project(ProjectBase):
     id: int

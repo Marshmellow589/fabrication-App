@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import apiConfig from '../../config/api'
 
 const Login = () => {
@@ -9,6 +10,7 @@ const Login = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -32,10 +34,25 @@ const Login = () => {
       )
 
       const token = response.data.access_token
-      localStorage.setItem('token', token)
-      console.log('Login successful, token:', token)
-      // Redirect to dashboard
-      navigate('/dashboard')
+      
+      // Get user info using the token
+      const userResponse = await axios.get(`${apiConfig.ENDPOINTS.AUTH}/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      const userData = {
+        ...userResponse.data,
+        token: token
+      }
+      
+      // Store user in AuthContext
+      login(userData)
+      console.log('Login successful, user:', userData)
+      
+      // Redirect to project selection instead of dashboard
+      navigate('/project-select')
       
     } catch (err) {
       setError('Invalid username or password')

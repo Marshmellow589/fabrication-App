@@ -91,7 +91,7 @@ export const authAPI = {
 
 // Final Inspection API calls
 export const finalInspectionAPI = {
-  getAll: () => apiGet(apiConfig.ENDPOINTS.FINAL),
+  getAll: (projectId) => apiGet(projectId ? `${apiConfig.ENDPOINTS.FINAL}?project_id=${projectId}` : apiConfig.ENDPOINTS.FINAL),
   getById: (id) => apiGet(`${apiConfig.ENDPOINTS.FINAL}/${id}`),
   create: (data) => apiPost(apiConfig.ENDPOINTS.FINAL, data),
   update: (id, data) => apiPut(`${apiConfig.ENDPOINTS.FINAL}/${id}`, data),
@@ -101,7 +101,7 @@ export const finalInspectionAPI = {
 
 // NDT API calls
 export const ndtAPI = {
-  getAll: () => apiGet(apiConfig.ENDPOINTS.NDT),
+  getAll: (projectId) => apiGet(projectId ? `${apiConfig.ENDPOINTS.NDT}?project_id=${projectId}` : apiConfig.ENDPOINTS.NDT),
   getById: (id) => apiGet(`${apiConfig.ENDPOINTS.NDT}/${id}`),
   create: (data) => apiPost(apiConfig.ENDPOINTS.NDT, data),
   update: (id, data) => apiPut(`${apiConfig.ENDPOINTS.NDT}/${id}`, data),
@@ -118,7 +118,7 @@ export const projectsAPI = {
 
 // Materials API calls
 export const materialsAPI = {
-  getAll: () => apiGet(apiConfig.ENDPOINTS.MATERIAL),
+  getAll: (projectId) => apiGet(projectId ? `${apiConfig.ENDPOINTS.MATERIAL}?project_id=${projectId}` : apiConfig.ENDPOINTS.MATERIAL),
   getById: (id) => apiGet(`${apiConfig.ENDPOINTS.MATERIAL}/${id}`),
   create: (data) => apiPost(apiConfig.ENDPOINTS.MATERIAL, data),
   update: (id, data) => apiPut(`${apiConfig.ENDPOINTS.MATERIAL}/${id}`, data)
@@ -126,7 +126,7 @@ export const materialsAPI = {
 
 // Fitup API calls
 export const fitupAPI = {
-  getAll: () => apiGet(apiConfig.ENDPOINTS.FITUP),
+  getAll: (projectId) => apiGet(projectId ? `${apiConfig.ENDPOINTS.FITUP}?project_id=${projectId}` : apiConfig.ENDPOINTS.FITUP),
   getById: (id) => apiGet(`${apiConfig.ENDPOINTS.FITUP}/${id}`),
   create: (data) => apiPost(apiConfig.ENDPOINTS.FITUP, data),
   update: (id, data) => apiPut(`${apiConfig.ENDPOINTS.FITUP}/${id}`, data)
@@ -134,5 +134,10 @@ export const fitupAPI = {
 
 // Dashboard API calls
 export const dashboardAPI = {
-  getStats: () => apiGet(apiConfig.ENDPOINTS.DASHBOARD)
+  getStats: (projectId) => apiGet(projectId ? `${apiConfig.ENDPOINTS.DASHBOARD}?project_id=${projectId}` : apiConfig.ENDPOINTS.DASHBOARD)
+};
+
+// Convenience function to get projects
+export const getProjects = (token) => {
+  return apiGet(apiConfig.ENDPOINTS.PROJECTS);
 };

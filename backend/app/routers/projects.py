@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from .. import models, schemas
 from ..crud import project_crud
 from ..database import get_db
-from ..core.security import get_current_active_user
+from ..core.security import get_current_active_user, get_current_admin_user
 
 router = APIRouter()
 
@@ -26,13 +26,22 @@ def create_project(
     *,
     db: Session = Depends(get_db),
     project_in: schemas.ProjectCreate,
-    current_user: models.User = Depends(get_current_active_user)
+    current_user: models.User = Depends(get_current_admin_user)
 ):
     """
-    Create new project.
+    Create new project (Admin only).
     """
-    project = project_crud.create(db, obj_in=project_in)
-    return project
+    try:
+        # Add created_by field from current user
+        project_data = project_in.model_dump()
+        project_data["created_by"] = current_user.id
+        project = project_crud.create_with_owner(db, obj_in=project_data)
+        return project
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 @router.get("/{project_id}", response_model=schemas.Project)
 def read_project(

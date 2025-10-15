@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from sqlalchemy.orm import Session
 from backend.app.database import SessionLocal, engine, Base
-from backend.app.models.user import User
+from backend.app.models.user import User, UserRole
 from backend.app.core.security import get_password_hash
 
 def add_admin_user():
@@ -34,6 +34,8 @@ def add_admin_user():
             username="admin2",
             email="admin2@example.com",
             hashed_password=get_password_hash("admin123"),
+            full_name="Administrator User",
+            role=UserRole.ADMIN,
             is_active=True,
             is_superuser=True  # Make this an admin user
         )
@@ -47,12 +49,13 @@ def add_admin_user():
         print(f"Password: admin123")
         print(f"User ID: {admin_user.id}")
         print(f"Is Superuser: {admin_user.is_superuser}")
+        print(f"Role: {admin_user.role}")
         
         # Show all users in database
         users = db.query(User).all()
         print(f"\nAll users in database:")
         for user in users:
-            print(f"  - {user.username} ({user.email}) - ID: {user.id} - Superuser: {user.is_superuser}")
+            print(f"  - {user.username} ({user.email}) - ID: {user.id} - Role: {user.role} - Superuser: {user.is_superuser}")
             
     except Exception as e:
         print(f"Error creating admin2 user: {e}")
