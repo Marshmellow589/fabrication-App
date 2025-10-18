@@ -85,7 +85,7 @@ export const authAPI = {
   },
   
   getCurrentUser: async () => {
-    return apiGet(`${apiConfig.ENDPOINTS.AUTH}/me`);
+    return apiGet(`${apiConfig.ENDPOINTS.USERS}/me`);
   }
 };
 

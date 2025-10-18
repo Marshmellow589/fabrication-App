@@ -36,7 +36,7 @@ const Login = () => {
       const token = response.data.access_token
       
       // Get user info using the token
-      const userResponse = await axios.get(`${apiConfig.ENDPOINTS.AUTH}/me`, {
+      const userResponse = await axios.get(`${apiConfig.ENDPOINTS.USERS}/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

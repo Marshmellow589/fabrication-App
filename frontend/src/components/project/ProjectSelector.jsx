@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getProjects } from '../../utils/api';
 import './ProjectSelector.css';
 
 const ProjectSelector = ({ onProjectSelect }) => {
   const { token } = useAuth();
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -30,6 +32,8 @@ const ProjectSelector = ({ onProjectSelect }) => {
 
   const handleProjectSelect = (project) => {
     onProjectSelect(project);
+    // Navigate to dashboard after project selection
+    navigate('/dashboard');
   };
 
   if (loading) {
