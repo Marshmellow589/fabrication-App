@@ -134,3 +134,25 @@ def delete_user(
     
     user_crud.remove(db, id=user_id)
     return {"message": "User deleted successfully"}
+
+@router.put("/{user_id}/password")
+def update_user_password(
+    user_id: int,
+    password_data: schemas.UserPasswordUpdate,
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_admin_user)
+):
+    """
+    Update user password (admin only).
+    """
+    user = user_crud.get(db, id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Update password using the CRUD method
+    updated_user = user_crud.update_password(db, db_obj=user, new_password=password_data.password)
+    
+    return {"message": "Password updated successfully"}

@@ -28,6 +28,9 @@ class UserUpdate(BaseModel):
     role: Optional[UserRole] = None
     is_active: Optional[bool] = None
 
+class UserPasswordUpdate(BaseModel):
+    password: str
+
 class User(UserBase):
     id: int
     is_active: bool

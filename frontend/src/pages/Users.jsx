@@ -4,10 +4,15 @@ import apiConfig from '../config/api'
 
 const Users = () => {
   const [users, setUsers] = useState([])
+  const [projects, setProjects] = useState([])
+  const [assignments, setAssignments] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [editingUser, setEditingUser] = useState(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [showAssignmentForm, setShowAssignmentForm] = useState(false)
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [currentUser, setCurrentUser] = useState(null)
   const [newUser, setNewUser] = useState({
     username: '',
     email: '',
@@ -16,11 +21,40 @@ const Users = () => {
     role: 'visitor',
     is_active: true
   })
+  const [newAssignment, setNewAssignment] = useState({
+    user_id: '',
+    project_id: '',
+    project_role: 'viewer',
+    assigned_by: ''
+  })
+  const [editingAssignment, setEditingAssignment] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
     fetchUsers()
+    fetchProjects()
+    fetchAssignments()
+    fetchCurrentUser()
   }, [])
+
+  const fetchCurrentUser = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${apiConfig.BASE_URL}/users/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const userData = await response.json()
+        setCurrentUser(userData)
+      }
+    } catch (err) {
+      console.error('Error fetching current user:', err)
+    }
+  }
 
   const fetchUsers = async () => {
     try {
@@ -42,6 +76,48 @@ const Users = () => {
     } catch (err) {
       setError(err.message)
       setLoading(false)
+    }
+  }
+
+  const fetchProjects = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${apiConfig.BASE_URL}/projects/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch projects')
+      }
+
+      const data = await response.json()
+      setProjects(data)
+    } catch (err) {
+      console.error('Error fetching projects:', err)
+    }
+  }
+
+  const fetchAssignments = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${apiConfig.BASE_URL}/assignments/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch assignments')
+      }
+
+      const data = await response.json()
+      setAssignments(data)
+    } catch (err) {
+      console.error('Error fetching assignments:', err)
     }
   }
 
@@ -100,6 +176,37 @@ const Users = () => {
     }
   }
 
+  const handleChangePassword = (user) => {
+    const newPassword = prompt(`Enter new password for ${user.username}:`)
+    if (newPassword && newPassword.trim() !== '') {
+      updateUserPassword(user.id, newPassword.trim())
+    }
+  }
+
+  const updateUserPassword = async (userId, newPassword) => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${apiConfig.BASE_URL}/users/${userId}/password`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password: newPassword })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update password')
+      }
+
+      alert('Password updated successfully!')
+      setError('')
+    } catch (err) {
+      setError(err.message)
+      alert('Failed to update password: ' + err.message)
+    }
+  }
+
   const handleCreate = async (e) => {
     e.preventDefault()
     try {
@@ -132,6 +239,118 @@ const Users = () => {
     } catch (err) {
       setError(err.message)
     }
+  }
+
+  const handleAssignProject = (user) => {
+    setSelectedUser(user)
+    setNewAssignment({
+      user_id: user.id,
+      project_id: '',
+      project_role: 'viewer',
+      assigned_by: currentUser ? currentUser.id : 1 // Default to admin ID if current user not available
+    })
+    setShowAssignmentForm(true)
+  }
+
+  const handleCreateAssignment = async (e) => {
+    e.preventDefault()
+    try {
+      const token = localStorage.getItem('token')
+      const assignmentData = {
+        ...newAssignment,
+        assigned_by: currentUser ? currentUser.id : 1 // Ensure assigned_by is included
+      }
+      
+      const response = await fetch(`${apiConfig.BASE_URL}/assignments/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(assignmentData)
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to assign project')
+      }
+
+      const createdAssignment = await response.json()
+      setAssignments([...assignments, createdAssignment])
+      setNewAssignment({
+        user_id: '',
+        project_id: '',
+        project_role: 'viewer',
+        assigned_by: ''
+      })
+      setShowAssignmentForm(false)
+      setSelectedUser(null)
+      setError('')
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  const handleEditAssignment = (assignment) => {
+    setEditingAssignment(assignment)
+  }
+
+  const handleUpdateAssignment = async (e) => {
+    e.preventDefault()
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${apiConfig.BASE_URL}/assignments/${editingAssignment.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          project_role: editingAssignment.project_role
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update assignment')
+      }
+
+      const updatedAssignment = await response.json()
+      setAssignments(assignments.map(assignment => 
+        assignment.id === updatedAssignment.id ? updatedAssignment : assignment
+      ))
+      setEditingAssignment(null)
+      setError('')
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  const handleDeleteAssignment = async (assignmentId) => {
+    if (!window.confirm('Are you sure you want to remove this project assignment?')) {
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${apiConfig.BASE_URL}/assignments/${assignmentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete assignment')
+      }
+
+      setAssignments(assignments.filter(assignment => assignment.id !== assignmentId))
+      setError('')
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  const getUserAssignments = (userId) => {
+    return assignments.filter(assignment => assignment.user_id === userId)
   }
 
   if (loading) return <div className="loading">Loading users...</div>
@@ -232,43 +451,108 @@ const Users = () => {
               <th>Full Name</th>
               <th>Role</th>
               <th>Status</th>
+              <th>Assigned Projects</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
-                <td>{user.full_name || '-'}</td>
-                <td>
-                  <span className={`status ${user.role}`}>
-                    {user.role}
-                  </span>
-                </td>
-                <td>
-                  <span className={`status ${user.is_active ? 'active' : 'inactive'}`}>
-                    {user.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td>
-                  <button
-                    onClick={() => handleEdit(user)}
-                    className="action-btn edit"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(user.id)}
-                    className="action-btn delete"
-                    style={{backgroundColor: '#e74c3c'}}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {users.map((user) => {
+              const userAssignments = getUserAssignments(user.id)
+              return (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.full_name || '-'}</td>
+                  <td>
+                    <span className={`status ${user.role}`}>
+                      {user.role}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`status ${user.is_active ? 'active' : 'inactive'}`}>
+                      {user.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td>
+                    {userAssignments.length > 0 ? (
+                      <div className="project-assignments">
+                        {userAssignments.map(assignment => (
+                          <div key={assignment.id} className="assignment-item">
+                            <span className="project-name">{assignment.project_name}</span>
+                            <span className={`role ${assignment.project_role}`}>
+                              ({assignment.project_role})
+                            </span>
+                            <button
+                              onClick={() => handleEditAssignment(assignment)}
+                              className="edit-btn"
+                              title="Edit assignment"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              onClick={() => handleDeleteAssignment(assignment.id)}
+                              className="remove-btn"
+                              title="Remove assignment"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="no-assignments">No projects assigned</span>
+                    )}
+                  </td>
+                  <td style={{whiteSpace: 'nowrap'}}>
+                    <button
+                      onClick={() => handleEdit(user)}
+                      className="action-btn edit"
+                      style={{margin: '2px'}}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleChangePassword(user)}
+                      className="action-btn password"
+                      style={{
+                        backgroundColor: '#f39c12', 
+                        color: 'white',
+                        margin: '2px',
+                        padding: '5px 10px',
+                        border: 'none',
+                        borderRadius: '3px',
+                        cursor: 'pointer'
+                      }}
+                      title="Change Password"
+                    >
+                      Change Password
+                    </button>
+                    <button
+                      onClick={() => handleAssignProject(user)}
+                      className="action-btn assign"
+                      style={{
+                        backgroundColor: '#3498db',
+                        margin: '2px'
+                      }}
+                    >
+                      Assign Project
+                    </button>
+                    <button
+                      onClick={() => handleDelete(user.id)}
+                      className="action-btn delete"
+                      style={{
+                        backgroundColor: '#e74c3c',
+                        margin: '2px'
+                      }}
+                      title="Delete user"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -330,6 +614,104 @@ const Users = () => {
                 <button
                   type="button"
                   onClick={() => setEditingUser(null)}
+                  className="back-button"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showAssignmentForm && selectedUser && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Assign Project to {selectedUser.username}</h3>
+            <form onSubmit={handleCreateAssignment} className="login-form">
+              <div className="form-group">
+                <label>Project:</label>
+                <select
+                  value={newAssignment.project_id}
+                  onChange={(e) => setNewAssignment({...newAssignment, project_id: parseInt(e.target.value)})}
+                  required
+                >
+                  <option value="">Select a project</option>
+                  {projects.map(project => (
+                    <option key={project.id} value={project.id}>
+                      {project.project_number} - {project.project_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Project Role:</label>
+                <select
+                  value={newAssignment.project_role}
+                  onChange={(e) => setNewAssignment({...newAssignment, project_role: e.target.value})}
+                >
+                  <option value="viewer">Viewer (Read Only)</option>
+                  <option value="editor">Editor (Read & Write)</option>
+                  <option value="manager">Manager (Full Access)</option>
+                </select>
+              </div>
+              <div className="modal-actions">
+                <button type="submit" className="login-button">Assign Project</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAssignmentForm(false)
+                    setSelectedUser(null)
+                  }}
+                  className="back-button"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {editingAssignment && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Edit Project Assignment</h3>
+            <form onSubmit={handleUpdateAssignment} className="login-form">
+              <div className="form-group">
+                <label>Project:</label>
+                <input
+                  type="text"
+                  value={editingAssignment.project_name}
+                  disabled
+                  className="disabled-input"
+                />
+              </div>
+              <div className="form-group">
+                <label>User:</label>
+                <input
+                  type="text"
+                  value={editingAssignment.username}
+                  disabled
+                  className="disabled-input"
+                />
+              </div>
+              <div className="form-group">
+                <label>Project Role:</label>
+                <select
+                  value={editingAssignment.project_role}
+                  onChange={(e) => setEditingAssignment({...editingAssignment, project_role: e.target.value})}
+                >
+                  <option value="viewer">Viewer (Read Only)</option>
+                  <option value="editor">Editor (Read & Write)</option>
+                  <option value="manager">Manager (Full Access)</option>
+                </select>
+              </div>
+              <div className="modal-actions">
+                <button type="submit" className="login-button">Update Assignment</button>
+                <button
+                  type="button"
+                  onClick={() => setEditingAssignment(null)}
                   className="back-button"
                 >
                   Cancel

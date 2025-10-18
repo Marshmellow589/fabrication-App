@@ -37,5 +37,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             return None
         return user
 
+    def update_password(self, db: Session, *, db_obj: User, new_password: str) -> User:
+        from ..core.security import get_password_hash
+        db_obj.hashed_password = get_password_hash(new_password)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
 
 user = CRUDUser(User)
