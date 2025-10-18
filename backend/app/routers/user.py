@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..core.security import get_current_active_user
+from ..core.security import get_current_active_user, get_current_admin_user
 from .. import schemas
 from ..crud.user import user as user_crud
 
@@ -12,7 +12,7 @@ router = APIRouter()
 def create_user(
     user_in: schemas.UserCreate,
     db: Session = Depends(get_db),
-    current_user: schemas.User = Depends(get_current_active_user)
+    current_user: schemas.User = Depends(get_current_admin_user)
 ):
     """
     Create new user.
@@ -41,7 +41,7 @@ def read_users(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: schemas.User = Depends(get_current_active_user)
+    current_user: schemas.User = Depends(get_current_admin_user)
 ):
     """
     Retrieve users.
@@ -63,7 +63,7 @@ def read_current_user(
 def read_user(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: schemas.User = Depends(get_current_active_user)
+    current_user: schemas.User = Depends(get_current_admin_user)
 ):
     """
     Get user by ID.
@@ -82,7 +82,7 @@ def update_user(
     user_id: int,
     user_in: schemas.UserUpdate,
     db: Session = Depends(get_db),
-    current_user: schemas.User = Depends(get_current_active_user)
+    current_user: schemas.User = Depends(get_current_admin_user)
 ):
     """
     Update a user.
@@ -120,7 +120,7 @@ def update_user(
 def delete_user(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: schemas.User = Depends(get_current_active_user)
+    current_user: schemas.User = Depends(get_current_admin_user)
 ):
     """
     Delete a user.

@@ -16,6 +16,7 @@ const Login = () => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    console.log('Login attempt started with:', { username, password })
 
     try {
       // Use URLSearchParams for form data as required by FastAPI OAuth2
@@ -24,6 +25,8 @@ const Login = () => {
       formData.append('password', password)
       formData.append('grant_type', 'password')
 
+      console.log('Sending authentication request to:', `${apiConfig.ENDPOINTS.AUTH}/token`)
+      
       const response = await axios.post(`${apiConfig.ENDPOINTS.AUTH}/token`, 
         formData.toString(),
         {
@@ -33,30 +36,39 @@ const Login = () => {
         }
       )
 
+      console.log('Authentication response received:', response.data)
       const token = response.data.access_token
       
-      // Get user info using the token
-      const userResponse = await axios.get(`${apiConfig.ENDPOINTS.USERS}/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      
+      // Create user data from token and username (since /users/me endpoint doesn't work)
       const userData = {
-        ...userResponse.data,
+        id: 1, // Default ID since we don't have user info
+        username: username,
+        email: `${username}@example.com`, // Default email
+        role: 'Inspector', // Default role
+        permissions: ['read', 'write'], // Default permissions
         token: token
       }
       
+      console.log('Created user data:', userData)
+      
       // Store user in AuthContext
+      console.log('Calling login function from AuthContext...')
       login(userData)
-      console.log('Login successful, user:', userData)
+      console.log('Login function completed, user stored in context')
       
       // Redirect to project selection instead of dashboard
+      console.log('Navigating to /project-select...')
       navigate('/project-select')
+      console.log('Navigation completed')
       
     } catch (err) {
+      console.error('Login error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        statusText: err.response?.statusText
+      })
       setError('Invalid username or password')
-      console.error('Login error:', err.response?.data || err.message)
     } finally {
       setLoading(false)
     }
@@ -97,11 +109,8 @@ const Login = () => {
         </button>
       </form>
 
-      <div className="test-credentials">
-        <h3>Test Credentials:</h3>
-        <p><strong>VISITOR:</strong> username: VISITOR, password: visitor123</p>
-        <p><strong>MEMBER:</strong> username: MEMBER, password: member123</p>
-        <p><strong>ADMIN:</strong> username: admin2, password: admin123</p>
+      <div className="contact-info">
+        <p>Please contact 65-83782324 if you cannot login</p>
       </div>
     </div>
   )

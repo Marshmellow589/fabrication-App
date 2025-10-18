@@ -17,8 +17,15 @@ def read_projects(
 ):
     """
     Retrieve projects.
+    - Admin users see all projects
+    - Non-admin users only see projects they are assigned to
     """
-    projects = project_crud.get_multi(db, skip=skip, limit=limit)
+    if current_user.role == "admin":
+        # Admin users can see all projects
+        projects = project_crud.get_multi(db, skip=skip, limit=limit)
+    else:
+        # Non-admin users only see projects they are assigned to
+        projects = project_crud.get_projects_by_user(db, user_id=current_user.id, skip=skip, limit=limit)
     return projects
 
 @router.post("/", response_model=schemas.Project)

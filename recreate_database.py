@@ -10,7 +10,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
 
 from backend.app.database import engine, Base
-from backend.app.models import user, project, material, fitup, final_inspection, ndt_request, audit_trail
+from backend.app.models import user, project, material, fitup, final_inspection, ndt_request, audit_trail, user_project_assignment
 
 def recreate_database():
     """Drop and recreate all database tables"""
