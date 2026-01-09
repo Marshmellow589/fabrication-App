@@ -15,15 +15,15 @@ jobs:
       - name: Build backend
         uses: docker/build-push-action@v4
         with:
-          context: ./backend
-          file: ./backend/Dockerfile
+          context: backend
+          file: backend/Dockerfile
           push: false
           tags: my-backend:latest
 
       - name: Build frontend
         uses: docker/build-push-action@v4
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: frontend
+          file: frontend/Dockerfile
           push: false
           tags: my-frontend:latest
